@@ -11,7 +11,7 @@ const ComentarioForm = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         
         if (!texto.trim()) {
@@ -27,14 +27,15 @@ const ComentarioForm = ({
         setIsSubmitting(true);
         setError(null);
 
-        try {
-            await onSubmit(texto);
-            setTexto('');
-        } catch (err) {
-            setError(err.message || 'Error al enviar el comentario');
-        } finally {
-            setIsSubmitting(false);
-        }
+        onSubmit(texto)
+            .then(() => {
+                setTexto('');
+                setIsSubmitting(false);
+            })
+            .catch((err) => {
+                setError(err.message || 'Error al enviar el comentario');
+                setIsSubmitting(false);
+            });
     };
 
     const handleCancel = () => {
@@ -44,47 +45,71 @@ const ComentarioForm = ({
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-3">
-            <div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="relative">
                 <textarea
                     value={texto}
                     onChange={(e) => setTexto(e.target.value)}
                     placeholder={placeholder}
-                    rows={3}
+                    rows={4}
                     maxLength={2000}
                     disabled={isSubmitting}
-                    className="w-full px-4 py-2 border border-gray-300 bg-[#f2f5f6] rounded focus:outline-none focus:ring-2 focus:ring-[#6c94c4] resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    className="w-full px-5 py-4 border-2 border-paleta1-blue-light bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-paleta1-blue focus:border-paleta1-blue resize-none disabled:bg-gray-50 disabled:cursor-not-allowed transition-all duration-200 placeholder-gray-400 text-gray-900"
                 />
-                <div className="text-sm text-gray-500 mt-1 text-right">
-                    {texto.length}/2000
+                
+                {/* Contador de caracteres estilizado */}
+                <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full border border-gray-200 shadow-sm">
+                    <span className={`text-sm font-medium ${texto.length > 1800 ? 'text-red-600' : 'text-paleta1-blue'}`}>
+                        {texto.length}
+                    </span>
+                    <span className="text-gray-400 text-sm">/2000</span>
                 </div>
             </div>
 
+            {/* Mensaje de error mejorado */}
             {error && (
-                <div className="text-red-600 text-sm bg-red-50 p-2 rounded">
-                    {error}
+                <div className="flex items-start gap-3 text-red-700 text-sm bg-red-50 border border-red-200 p-4 rounded-xl">
+                    <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">{error}</span>
                 </div>
             )}
 
-            <div className="flex gap-2">
-                <button
-                    type="submit"
-                    disabled={isSubmitting || !texto.trim()}
-                    className="px-4 py-2 bg-[#6c94c4] text-white rounded hover:bg-[#5a7da8] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                >
-                    {isSubmitting ? 'Enviando...' : submitLabel}
-                </button>
-
+            {/* Botones de acción modernos */}
+            <div className="flex gap-3 justify-end pt-2">
                 {onCancel && (
                     <button
                         type="button"
                         onClick={handleCancel}
                         disabled={isSubmitting}
-                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                        className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:cursor-not-allowed transition-colors font-medium border border-gray-300"
                     >
                         Cancelar
                     </button>
                 )}
+                
+                <button
+                    type="submit"
+                    disabled={isSubmitting || !texto.trim()}
+                    className="px-8 py-3 bg-gradient-to-r from-paleta1-blue to-paleta1-blue/90 text-white rounded-xl hover:from-paleta1-blue/90 hover:to-paleta1-blue disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg flex items-center gap-2"
+                >
+                    {isSubmitting ? (
+                        <>
+                            <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Enviando...
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                            {submitLabel}
+                        </>
+                    )}
+                </button>
             </div>
         </form>
     );

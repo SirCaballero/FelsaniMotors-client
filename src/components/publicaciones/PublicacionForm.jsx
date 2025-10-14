@@ -1,10 +1,13 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import authService from "../../services/authService";
 
 const PublicacionForm = () => {
 
     const { user } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const fileInputRef = useRef(null);
 
     // Estructura JSON de los endpoints
 
@@ -40,9 +43,22 @@ const PublicacionForm = () => {
     const AUTO_URL = "http://localhost:4002/api/autos";
     const PUBLICACION_URL = "http://localhost:4002/api/publicaciones";
     
-    // El ID del usuario ahora viene del contexto de autenticación
-    // Si user no está disponible aún, usar un valor por defecto (esto no debería pasar si el componente está protegido)
-    const USUARIO_ID = user?.id || 1;
+    const USUARIO_ID = user?.idUsuario;
+
+    const createAuthHeaders = (includeContentType = true) => {
+        const headers = new Headers();
+        const token = authService.getToken();
+        
+        if (token) {
+            headers.append('Authorization', `Bearer ${token}`);
+        }
+        
+        if (includeContentType) {
+            headers.append('Content-Type', 'application/json');
+        }
+        
+        return headers;
+    };
 
     const handleAutoChange = (e) => {
         const { name, value } = e.target;
@@ -77,15 +93,9 @@ const PublicacionForm = () => {
         setIsSubmitting(true);
         
         // 1. Crear el Auto
-        console.log("1. Creando auto...");
-        const token = authService.getToken();
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', `Bearer ${token}`);
-        
         fetch(AUTO_URL, {
             method: "POST",
-            headers: headers,
+            headers: createAuthHeaders(),
             body: JSON.stringify(autoData)
         })
         .then((autoResponse) => {
@@ -93,24 +103,16 @@ const PublicacionForm = () => {
             return autoResponse.json();
         })
         .then((createdAuto) => {
-            console.log("Auto creado:", createdAuto);
-            
             // 2. Crear la Publicación
-            console.log("2. Creando publicación...");
             const publicacionPayload = {
                 ...publicacionData,
                 idUsuario: USUARIO_ID,
                 idAuto: createdAuto.idAuto
             };
             
-            const token2 = authService.getToken();
-            const headers2 = new Headers();
-            headers2.append('Content-Type', 'application/json');
-            headers2.append('Authorization', `Bearer ${token2}`);
-            
             return fetch(PUBLICACION_URL, {
                 method: "POST",
-                headers: headers2,
+                headers: createAuthHeaders(),
                 body: JSON.stringify(publicacionPayload)
             }).then((publicacionResponse) => {
                 if (!publicacionResponse.ok) throw new Error("Error al crear la publicación");
@@ -118,11 +120,8 @@ const PublicacionForm = () => {
             });
         })
         .then((createdPublicacion) => {
-            console.log("Publicación creada:", createdPublicacion);
-            
             // 3. Subir las fotos
             if (fotos.length > 0) {
-                console.log("3. Subiendo fotos...");
                 const FOTOS_URL = `http://localhost:4002/api/publicaciones/${createdPublicacion.idPublicacion}/fotos`;
                 
                 const uploadPromises = [];
@@ -133,17 +132,9 @@ const PublicacionForm = () => {
                     formData.append("esPrincipal", i === fotoPrincipalIndex ? "true" : "false");
                     formData.append("orden", i.toString());
                     
-                    // Para FormData, necesitamos crear headers sin Content-Type
-                    // ya que el navegador lo agrega automáticamente con el boundary correcto
-                    const headersForFormData = new Headers();
-                    const tokenFoto = authService.getToken();
-                    if (tokenFoto) {
-                        headersForFormData.append("Authorization", `Bearer ${tokenFoto}`);
-                    }
-                    
                     const uploadPromise = fetch(FOTOS_URL, {
                         method: "POST",
-                        headers: headersForFormData,
+                        headers: createAuthHeaders(false),
                         body: formData
                     })
                     .then((fotoResponse) => {
@@ -152,11 +143,6 @@ const PublicacionForm = () => {
                             return null;
                         }
                         return fotoResponse.json();
-                    })
-                    .then((fotoData) => {
-                        if (fotoData) {
-                            console.log(`Foto ${i + 1} subida:`, fotoData);
-                        }
                     })
                     .catch((error) => {
                         console.error(`Error al subir foto ${i + 1}:`, error);
@@ -169,8 +155,7 @@ const PublicacionForm = () => {
             }
         })
         .then(() => {
-            alert("Publicacion creada exitosamente");
-            
+            // Limpiar formulario
             setAutoData({
                 marca: "",
                 modelo: "",
@@ -195,12 +180,14 @@ const PublicacionForm = () => {
             setFotos([]);
             setFotoPrincipalIndex(0);
             
-            const fileInput = document.querySelector('input[type="file"]');
-            if (fileInput) fileInput.value = "";
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+            
+            navigate('/publicaciones');
         })
         .catch((error) => {
             console.error("Error al crear publicación:", error);
-            alert("Error al crear la publicación. Por favor, intenta de nuevo.");
         })
         .finally(() => {
             setIsSubmitting(false);
@@ -385,6 +372,7 @@ const PublicacionForm = () => {
                 <div className="mb-4">
                     <label className="block text-gray-700 font-medium mb-2">Seleccionar Fotos:</label>
                     <input
+                        ref={fileInputRef}
                         type="file"
                         accept="image/*"
                         multiple

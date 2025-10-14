@@ -1,6 +1,6 @@
 //Nico
 import SearchBar from './SearchBar';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext } from 'react';
 import LogInPopup from '../usuario/LogInPopup';
 import SignInPopup from '../usuario/SignInPopup';
 import { AuthContext } from '../../context/AuthContext';
@@ -13,12 +13,9 @@ const Navbar = () => {
   const [cartVisible, setCartVisible] = useState(false); // Estado para mostrar/ocultar carrito
   const [cartCount, setCartCount] = useState(0); // Estado para el contador del carrito
 
-  const { isAuthenticated, user, logout } = useContext(AuthContext);
-
-  // Actualiza el contador del carrito al montar el componente
-  useEffect(() => {
-    setCartCount(cartService.getCartCount());
-  }, []);
+    const [visibleLogIn, setVisibleLogIn] = useState(false)
+    const [visibleSignIn, setVisibleSignIn] = useState(false)
+    const { isAuthenticated, user, logout } = useContext(AuthContext);
 
   const openSignIn = () => {
     setVisibleLogIn(false);
@@ -30,28 +27,20 @@ const Navbar = () => {
     setVisibleLogIn(true);
   };
 
-  const handleLogout = () => {
-    logout();
-  };
+    const handleLogout = () => {
+        logout();
+    }
 
-  const toggleCart = () => {
-    setCartVisible(!cartVisible); // Alterna la visibilidad del carrito
-  };
+    return(
+        <header className="bg-paleta1-blue">
 
-  // Función para actualizar contador después de acciones en el carrito
-    const updateCartCount = () => {
-        setCartCount(cartService.getCartCount());
-  };
+            {/** Division de componentes*/}
+            <nav className="flex gap-5 px-8">
 
-  return (
-    <>
-      <header className="bg-paleta1-blue">
-        {/* Division de componentes */}
-        <nav className="flex gap-5 px-8">
-          {/* Logo */}
-          <div className='hover:cursor-pointer self-center '>
-            <img src='/src/assets/Logo_Felsani_Motors_Page.png' className="h-28" />
-          </div>
+                {/** Logo */}
+                <div className='hover:cursor-pointer self-center '>
+                    <img src='/src/assets/Logo_Felsani_Motors_Page.png' className="h-28"/>
+                </div>
 
           {/* SearchBar */}
           <div className="grow ">
@@ -60,37 +49,38 @@ const Navbar = () => {
 
           <div className='flex items-center gap-3'>
 
-            {/* CrearPublicacion */}
-            <div className="relative group">
-              <div className="flex items-center justify-center rounded-full size-8 hover:bg-blue-300 transition-all duration-200 ease-in-out">
-                <button className='text-white hover:cursor-pointer'>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                  </svg>
-                </button>
-              </div>
-              {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
-                Crear Publicación
-                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
-              </div>
-            </div>
+                    {/** CrearPublicacion */}
+                    <div className="relative group">
+                        <div className="flex items-center justify-center rounded-full size-8 hover:bg-blue-300 transition-all duration-200 ease-in-out">
+                            <button className='text-white hover:cursor-pointer'>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                            </button>
+                        </div>
+                        {/* Tooltip */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                            Crear Publicación
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                        </div>
+                    </div>
 
-            {/* Publicaciones del usuario */}
-            <div className="relative group">
-              <div className="flex items-center justify-center rounded-full size-8 hover:bg-blue-300 transition-all duration-200 ease-in-out">
-                <button className="text-white hover:cursor-pointer">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                  </svg>
-                </button>
-              </div>
-              {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
-                Mis Publicaciones
-                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
-              </div>
-            </div>
+                    {/** Publicaciones del usuario */}
+                    <div className="relative group">
+                        <div className="flex items-center justify-center rounded-full size-8 hover:bg-blue-300 transition-all duration-200 ease-in-out">
+                            <button className="text-white hover:cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                </svg>
+
+                            </button>
+                        </div>
+                        {/* Tooltip */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                            Mis Publicaciones
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                        </div>
+                    </div>
 
             {/* Carrito de compras */}
             <div className="relative group">

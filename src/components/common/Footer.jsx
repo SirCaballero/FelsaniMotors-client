@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -36,36 +37,28 @@ const Footer = () => {
             <h3 className="text-paleta1-blue text-lg font-bold mb-4">Enlaces Rápidos</h3>
             <ul className="space-y-2">
               <li>
-                <a 
-                  href="/autos" 
+                <Link 
+                  to="/publicaciones" 
                   className="text-gray-800 text-sm transition-colors hover:text-paleta1-blue hover:underline"
                 >
                   Ver Autos
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="/vender" 
+                <Link 
+                  to="/crear-publicacion" 
                   className="text-gray-800 text-sm transition-colors hover:text-paleta1-blue hover:underline"
                 >
                   Vender mi Auto
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="/como-funciona" 
+                <Link 
+                  to="/faq" 
                   className="text-gray-800 text-sm transition-colors hover:text-paleta1-blue hover:underline"
                 >
-                  Cómo Funciona
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="/blog" 
-                  className="text-gray-800 text-sm transition-colors hover:text-paleta1-blue hover:underline"
-                >
-                  Blog
-                </a>
+                  FAQ
+                </Link>
               </li>
             </ul>
           </div>

@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const Filter = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
+  
   const [filters, setFilters] = useState({
     marca: [],
     modelo: [],
@@ -14,58 +18,44 @@ const Filter = () => {
     motor: []
   });
 
-  // Opciones para cada filtro
-  const marcas = ['Toyota', 'Ford', 'Chevrolet', 'Honda', 'Volkswagen', 'Nissan', 'Hyundai', 'Fiat', 'Renault', 'Peugeot'];
-  
-  // Modelos por marca
-  const modelosPorMarca = {
-    'Toyota': ['Corolla', 'Etios', 'Hilux', 'SW4', 'RAV4', 'Yaris', 'Camry'],
-    'Ford': ['Focus', 'Fiesta', 'Ranger', 'EcoSport', 'Ka', 'Mondeo', 'Territory'],
-    'Chevrolet': ['Cruze', 'Onix', 'Tracker', 'S10', 'Spin', 'Prisma', 'Montana'],
-    'Honda': ['Civic', 'City', 'HR-V', 'CR-V', 'Fit', 'Accord'],
-    'Volkswagen': ['Gol', 'Polo', 'Vento', 'Amarok', 'T-Cross', 'Tiguan', 'Passat'],
-    'Nissan': ['Versa', 'Sentra', 'Kicks', 'Frontier', 'X-Trail', 'March'],
-    'Hyundai': ['HB20', 'Creta', 'Tucson', 'Elantra', 'i30', 'Santa Fe'],
-    'Fiat': ['Argo', 'Cronos', 'Toro', 'Strada', 'Pulse', 'Mobi', 'Fastback'],
-    'Renault': ['Sandero', 'Logan', 'Duster', 'Kangoo', 'Alaskan', 'Captur'],
-    'Peugeot': ['208', '2008', '3008', '308', '408', '5008', 'Partner']
-  };
-
-  // Obtener modelos disponibles según las marcas seleccionadas
-  const getModelosDisponibles = () => {
-    if (filters.marca.length === 0) {
-      // Si no hay marcas seleccionadas, mostrar todos los modelos
-      return Object.values(modelosPorMarca).flat();
-    }
-    // Mostrar solo modelos de las marcas seleccionadas
-    return filters.marca.flatMap(marca => modelosPorMarca[marca] || []);
-  };
-
-  const filterOptions = {
-    marca: marcas,
-    modelo: getModelosDisponibles(),
-    anio: ['2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011', '2010'],
-    estado: ['Nuevo', 'Usado', 'Seminuevo'],
+  const [filterOptions, setFilterOptions] = useState({
+    marca: [],
+    modelo: [],
+    anio: [],
+    estado: [],
     kilometraje: ['0-50000', '50000-100000', '100000-150000', '150000-200000', '200000+'],
-    combustible: ['Nafta', 'Diesel', 'GNC', 'Eléctrico', 'Híbrido'],
-    tipoCategoria: ['Sedán', 'SUV', 'Hatchback', 'Pickup', 'Coupé', 'Minivan', 'Deportivo'],
-    tipoCaja: ['Manual', 'Automática', 'CVT', 'Secuencial'],
-    motor: ['1.0', '1.4', '1.6', '1.8', '2.0', '2.4', '3.0', '3.5', '4.0']
-  };
+    combustible: [],
+    tipoCategoria: [],
+    tipoCaja: [],
+    motor: []
+  });
+
+  useEffect(() => {
+    fetch('http://localhost:4002/api/publicaciones/filtros/opciones')
+      .then(response => response.json())
+      .then(data => {
+        setFilterOptions({
+          marca: data.marcas || [],
+          modelo: data.modelos || [],
+          anio: data.anios?.map(String) || [],
+          estado: data.estados || [],
+          kilometraje: ['0-50000', '50000-100000', '100000-150000', '150000-200000', '200000+'],
+          combustible: data.combustibles || [],
+          tipoCategoria: data.tipoCategorias || [],
+          tipoCaja: data.tipoCajas || [],
+          motor: data.motores || []
+        });
+      })
+      .catch(error => console.error('Error cargando opciones de filtros:', error));
+  }, []);
 
   const [openDropdowns, setOpenDropdowns] = useState({});
 
   const toggleDropdown = (filterName) => {
-    setOpenDropdowns(prev => {
-      const isCurrentlyOpen = prev[filterName];
-      // Si está abierto, lo cierra. Si está cerrado, cierra todos los demás y abre este
-      if (isCurrentlyOpen) {
-        return { ...prev, [filterName]: false };
-      } else {
-        // Cierra todos y abre solo el seleccionado
-        return { [filterName]: true };
-      }
-    });
+    setOpenDropdowns(prev => ({
+      ...prev,
+      [filterName]: !prev[filterName]
+    }));
   };
 
   const handleCheckboxChange = (filterName, value) => {
@@ -97,8 +87,20 @@ const Filter = () => {
   };
 
   const applyFilters = () => {
-    console.log('Filtros aplicados:', filters);
-    // Aquí irá la lógica para filtrar los autos
+    const params = new URLSearchParams();
+    
+    const textoBusqueda = searchParams.get('q');
+    if (textoBusqueda) {
+      params.append('q', textoBusqueda);
+    }
+    
+    Object.entries(filters).forEach(([key, values]) => {
+      values.forEach(value => {
+        params.append(key, value);
+      });
+    });
+    
+    navigate(`/publicaciones?${params.toString()}`);
     setIsOpen(false);
   };
 
@@ -121,7 +123,6 @@ const Filter = () => {
 
   return (
     <div className="relative">
-      {/* Botón de Filtros */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-100 transition-colors hover:cursor-pointer"
@@ -139,6 +140,7 @@ const Filter = () => {
             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
           />
         </svg>
+        {/* Badge contador de filtros activos */}
         {activeFiltersCount > 0 && (
           <span className="bg-white text-gray-700 rounded-full px-2 py-0.5 text-xs font-bold">
             {activeFiltersCount}
@@ -146,26 +148,28 @@ const Filter = () => {
         )}
       </button>
 
-      {/* Popup de Filtros */}
+      {/* === MODAL DE FILTROS === */}
+      {/* Utiliza paleta1-blue como color principal y paleta1-cream para fondos suaves */}
       {isOpen && (
         <>
-          {/* Overlay */}
+          {/* Overlay de fondo - oscurece el contenido detrás del modal */}
           <div 
             className="fixed inset-0 bg-black/50 z-40"
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Modal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-2">
+          {/* Contenedor principal del modal */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div 
-              className="bg-white rounded-lg shadow-2xl w-[95%] max-w-7xl h-[98vh] flex flex-col"
+              className="bg-white rounded-lg shadow-2xl w-[90%] max-w-4xl h-[85vh] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
-              <div className="flex items-center justify-between p-8 border-b border-gray-200">
-                <h2 className="text-3xl font-bold text-paleta1-blue flex items-center gap-2">
+              {/* === HEADER DEL MODAL === */}
+              {/* Usa paleta1-blue para títulos y elementos importantes */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 className="text-2xl font-bold text-paleta1-blue flex items-center gap-2">
                   <svg 
-                    className="w-6 h-6" 
+                    className="w-5 h-5" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -184,31 +188,43 @@ const Filter = () => {
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                   aria-label="Cerrar"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
 
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* === CONTENIDO PRINCIPAL === */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {/* Lista expandible de filtros */}
+                {/* Implementa design pattern de acordeón con paleta de colores consistente */}
+                <div className="space-y-2">
                   {Object.keys(filters).map((filterKey) => (
-                    <div key={filterKey} className="relative mb-4">
-                      <button
+                    <div key={filterKey} className="relative">
+                      {/* Botón de categoría de filtro */}
+                      {/* Usa fondos limpios sin beige */}
+                      <div
                         onClick={() => toggleDropdown(filterKey)}
-                        className="w-full flex items-center justify-between px-5 py-4 bg-paleta1-cream rounded-lg hover:bg-paleta1-blue-light/30 transition-colors border border-paleta1-blue-light"
+                        className={`flex items-center justify-between px-4 py-3 bg-white border border-paleta1-blue-light ${
+                          openDropdowns[filterKey] 
+                            ? 'rounded-t-lg border-b-0' 
+                            : 'rounded-lg'
+                        } hover:bg-blue-50 transition-colors cursor-pointer`}
                       >
-                        <span className="font-medium text-gray-800">
-                          {getFilterLabel(filterKey)}
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium text-paleta1-blue">
+                            {getFilterLabel(filterKey)}
+                          </span>
+                          {/* Badge de contador para filtros activos en esta categoría */}
                           {filters[filterKey].length > 0 && (
                             <span className="ml-2 text-xs bg-paleta1-blue text-white rounded-full px-2 py-0.5">
                               {filters[filterKey].length}
                             </span>
                           )}
-                        </span>
+                        </div>
+                        {/* Icono de flecha que rota según el estado */}
                         <svg
-                          className={`w-5 h-5 text-paleta1-blue transition-transform ${
+                          className={`w-4 h-4 text-paleta1-blue transition-transform ${
                             openDropdowns[filterKey] ? 'rotate-180' : ''
                           }`}
                           fill="none"
@@ -217,28 +233,38 @@ const Filter = () => {
                         >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                      </button>
+                      </div>
 
-                      {/* Dropdown */}
+                      {/* === DROPDOWN EXPANDIBLE === */}
+                      {/* Se conecta visualmente con el botón principal sin espacios */}
                       {openDropdowns[filterKey] && (
-                        <div className="absolute z-10 mt-2 w-full bg-white border border-paleta1-blue-light rounded-lg shadow-lg max-h-80 overflow-y-auto">
-                          <div className="p-4">
-                            {filterOptions[filterKey].map((option) => (
-                              <label
-                                key={option}
-                                className="flex items-center px-4 py-4 hover:bg-paleta1-cream rounded cursor-pointer transition-colors mb-1"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={filters[filterKey].includes(option)}
-                                  onChange={() => handleCheckboxChange(filterKey, option)}
-                                  className="w-5 h-5 text-paleta1-blue border-gray-300 rounded focus:ring-paleta1-blue focus:ring-2"
-                                />
-                                <span className="ml-4 text-base text-gray-700">
-                                  {option}
-                                </span>
-                              </label>
-                            ))}
+                        <div className="overflow-hidden">
+                          <div className="bg-white border-l border-r border-b border-paleta1-blue-light rounded-b-lg">
+                            {/* Header del dropdown */}
+                            <div className="p-3 bg-blue-50">
+                              <div className="text-xs font-medium text-paleta1-blue mb-2">
+                                Seleccionar {getFilterLabel(filterKey)}
+                              </div>
+                            </div>
+                            {/* Lista de opciones con scroll */}
+                            <div className="p-2 max-h-60 overflow-y-auto">
+                              {filterOptions[filterKey].map((option) => (
+                                <label
+                                  key={option}
+                                  className="flex items-center px-3 py-2 hover:bg-blue-50 rounded cursor-pointer transition-colors"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={filters[filterKey].includes(option)}
+                                    onChange={() => handleCheckboxChange(filterKey, option)}
+                                    className="w-4 h-4 text-paleta1-blue border-paleta1-blue-light rounded focus:ring-paleta1-blue focus:ring-2"
+                                  />
+                                  <span className="ml-3 text-sm text-gray-700">
+                                    {option}
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -246,18 +272,19 @@ const Filter = () => {
                   ))}
                 </div>
 
-                {/* Filtros Activos */}
+                {/* Resumen de filtros activos sin beige */}
                 {activeFiltersCount > 0 && (
-                  <div className="mt-8 p-6 bg-paleta1-blue-light/20 rounded-lg">
-                    <h3 className="text-base font-semibold text-gray-700 mb-4">
+                  <div className="mt-6 p-4 bg-blue-50 border border-paleta1-blue-light rounded-lg">
+                    <h3 className="text-sm font-semibold text-paleta1-blue mb-3">
                       Filtros Activos ({activeFiltersCount})
                     </h3>
-                    <div className="flex flex-wrap gap-3">
+                    {/* Tags de filtros activos con botón de eliminación */}
+                    <div className="flex flex-wrap gap-2">
                       {Object.entries(filters).map(([key, values]) =>
                         values.map((value) => (
                           <span
                             key={`${key}-${value}`}
-                            className="inline-flex items-center gap-1 px-3 py-1 bg-paleta1-blue text-white text-sm rounded-full"
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-paleta1-blue text-white text-xs rounded-full"
                           >
                             {getFilterLabel(key)}: {value}
                             <button
@@ -276,24 +303,27 @@ const Filter = () => {
                 )}
               </div>
 
-              {/* Footer */}
-              <div className="flex items-center justify-between p-8 border-t border-gray-200 bg-gray-50">
+              {/* === FOOTER CON ACCIONES === */}
+              {/* Usa fondos limpios sin beige */}
+              <div className="flex items-center justify-between p-6 border-t border-paleta1-blue-light bg-gray-50">
+                {/* Botón para limpiar todos los filtros */}
                 <button
                   onClick={clearFilters}
-                  className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors text-base"
+                  className="px-4 py-2 text-paleta1-blue hover:text-paleta1-blue/80 font-medium transition-colors text-sm border border-paleta1-blue-light rounded-lg hover:bg-blue-50"
                 >
                   Limpiar Filtros
                 </button>
-                <div className="flex gap-4">
+                {/* Botones de acción principales */}
+                <div className="flex gap-3">
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="px-8 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-base"
+                    className="px-6 py-2 border border-paleta1-blue-light text-paleta1-blue rounded-lg hover:bg-blue-50 transition-colors text-sm"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={applyFilters}
-                    className="px-8 py-3 bg-paleta1-blue text-white rounded-lg hover:bg-paleta1-blue/90 transition-colors shadow-md text-base font-medium"
+                    className="px-6 py-2 bg-paleta1-blue text-white rounded-lg hover:bg-paleta1-blue/90 transition-colors shadow-md text-sm font-medium"
                   >
                     Aplicar Filtros
                   </button>

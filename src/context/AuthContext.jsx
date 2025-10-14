@@ -26,22 +26,37 @@ export function AuthProvider({ children }) {
 
   // Función de login
   const login = (email, password) => {
+    let authToken;
+    
     return authService.login(email, password)
       .then((data) => {
-        // Por ahora guardamos solo el email como dato del usuario
-        // Puedes ajustar esto según lo que devuelva tu backend
+        authToken = data.access_token;
+
+        const headers = new Headers();
+        headers.append('Authorization', `Bearer ${authToken}`);
+        
+        return fetch('http://localhost:4002/api/usuarios/me', {
+          method: 'GET',
+          headers: headers }) })
+      .then((response) => {
+        if (!response.ok) { throw new Error('Error al obtener datos del usuario') }
+        return response.json() })
+      .then((userFromApi) => {
+        // Crear objeto de usuario con los datos del backend
         const userData = {
-          email: email,
-          firstname: '',
-          lastname: '',
-          role: 'USER',
+          idUsuario: userFromApi.idUsuario,
+          email: userFromApi.email,
+          nombre: userFromApi.nombre,
+          apellido: userFromApi.apellido,
+          telefono: userFromApi.telefono,
+          rol: userFromApi.rol
         };
         
         authService.setUserData(userData);
         setUser(userData);
         setIsAuthenticated(true);
         
-        return { success: true, data };
+        return { success: true, data: userData };
       })
       .catch((error) => {
         setIsAuthenticated(false);
@@ -52,22 +67,44 @@ export function AuthProvider({ children }) {
 
   // Función de registro
   const register = (email, password, firstname, lastname, telefono, role = 'USER') => {
+    let authToken;
+    
     return authService.register(email, password, firstname, lastname, telefono, role)
       .then((data) => {
-        // Crear objeto de usuario
+        // Guardar el token
+        authToken = data.access_token;
+        
+        // Hacer segundo request para obtener datos del usuario autenticado
+        const headers = new Headers();
+        headers.append('Authorization', `Bearer ${authToken}`);
+        
+        return fetch('http://localhost:4002/api/usuarios/me', {
+          method: 'GET',
+          headers: headers
+        });
+      })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Error al obtener datos del usuario');
+        }
+        return response.json();
+      })
+      .then((userFromApi) => {
+        // Crear objeto de usuario con los datos del backend
         const userData = {
-          email,
-          firstname,
-          lastname,
-          role,
-          telefono,
+          idUsuario: userFromApi.idUsuario,
+          email: userFromApi.email,
+          nombre: userFromApi.nombre,
+          apellido: userFromApi.apellido,
+          telefono: userFromApi.telefono,
+          rol: userFromApi.rol
         };
         
         authService.setUserData(userData);
         setUser(userData);
         setIsAuthenticated(true);
         
-        return { success: true, data };
+        return { success: true, data: userData };
       })
       .catch((error) => {
         setIsAuthenticated(false);
