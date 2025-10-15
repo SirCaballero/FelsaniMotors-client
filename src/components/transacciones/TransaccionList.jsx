@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from "../../context/AuthContext";
 import authService from '../../services/authService';
 import TransaccionCard from "./TransaccionCard";
 
@@ -8,26 +8,40 @@ const TransaccionList = () => {
     const [transacciones, setTransacciones] = useState([]);
 
     useEffect(() => {
-        if (!user?.id) return;
+        if (!user?.idUsuario) {
+            return;
+        }
 
-        const URLTransacciones = `http://localhost:4002/api/transacciones/usuario/${user.id}`;
-        
         const token = authService.getToken();
         const headers = new Headers();
         headers.append('Content-Type', 'application/json');
         headers.append('Authorization', `Bearer ${token}`);
 
-        fetch(URLTransacciones, {
+        // Usar endpoint específico del usuario
+        const URL_TRANSACCIONES = `http://localhost:4002/api/transacciones/usuario/${user.idUsuario}`;
+
+        fetch(URL_TRANSACCIONES, {
             method: "GET",
             headers: headers
         })
         .then((response) => {
+            if (response.status === 204) {
+                // No hay contenido - sin transacciones
+                setTransacciones([]);
+                return null;
+            }
             if(!response.ok) throw new Error("Transacciones no encontradas");
             return response.json();
         })
-        .then((data) => setTransacciones(data))
-        .catch((error) => console.error("Error buscando transacciones : ", error));
-    }, [user?.id]);
+        .then((data) => {
+            if (data) {
+                setTransacciones(data);
+            }
+        })
+        .catch((error) => {
+            console.error("Error buscando transacciones : ", error);
+        });
+    }, [user]);
 
     return(
         <div>
@@ -38,7 +52,7 @@ const TransaccionList = () => {
                 transacciones.map(transaccion => (
                     <TransaccionCard 
                         key={transaccion.idTransaccion}
-                        idTransaccion={transaccion.idTransaccion}
+                        transaccion={transaccion}
                     />
                 ))
             )}

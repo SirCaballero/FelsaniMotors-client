@@ -23,12 +23,21 @@ const Filter = () => {
     modelo: [],
     anio: [],
     estado: [],
-    kilometraje: ['0-50000', '50000-100000', '100000-150000', '150000-200000', '200000+'],
+    kilometraje: [],
     combustible: [],
     tipoCategoria: [],
     tipoCaja: [],
     motor: []
   });
+
+  // Mapeo para mostrar valores formateados en UI pero enviar valores correctos al backend
+  const kilometrajeDisplay = {
+    '0-50000': '0-50.000 km',
+    '50000-100000': '50.000-100.000 km',
+    '100000-150000': '100.000-150.000 km',
+    '150000-200000': '150.000-200.000 km',
+    '200000-999999999': '200.000+ km'
+  };
 
   useEffect(() => {
     fetch('http://localhost:4002/api/publicaciones/filtros/opciones')
@@ -39,7 +48,7 @@ const Filter = () => {
           modelo: data.modelos || [],
           anio: data.anios?.map(String) || [],
           estado: data.estados || [],
-          kilometraje: ['0-50000', '50000-100000', '100000-150000', '150000-200000', '200000+'],
+          kilometraje: ['0-50000', '50000-100000', '100000-150000', '150000-200000', '200000-999999999'],
           combustible: data.combustibles || [],
           tipoCategoria: data.tipoCategorias || [],
           tipoCaja: data.tipoCajas || [],
@@ -60,14 +69,21 @@ const Filter = () => {
 
   const handleCheckboxChange = (filterName, value) => {
     setFilters(prev => {
-      const currentValues = prev[filterName];
-      const newValues = currentValues.includes(value)
-        ? currentValues.filter(v => v !== value)
-        : [...currentValues, value];
+      const currentArray = prev[filterName];
+      const isSelected = currentArray.includes(value);
+      
+      let updatedArray;
+      if (isSelected) {
+        // Si ya esta, lo removemos del array
+        updatedArray = currentArray.filter(v => v !== value);
+      } else {
+        // Si no esta, lo agregamos al array
+        updatedArray = [...currentArray, value];
+      }
       
       return {
         ...prev,
-        [filterName]: newValues
+        [filterName]: updatedArray
       };
     });
   };
@@ -94,11 +110,11 @@ const Filter = () => {
       params.append('q', textoBusqueda);
     }
     
-    Object.entries(filters).forEach(([key, values]) => {
-      values.forEach(value => {
+    for (const key in filters) {
+      filters[key].forEach(value => {
         params.append(key, value);
       });
-    });
+    }
     
     navigate(`/publicaciones?${params.toString()}`);
     setIsOpen(false);
@@ -119,7 +135,10 @@ const Filter = () => {
     return labels[key] || key;
   };
 
-  const activeFiltersCount = Object.values(filters).reduce((acc, arr) => acc + arr.length, 0);
+  let activeFiltersCount = 0;
+  for (const key in filters) {
+    activeFiltersCount += filters[key].length;
+  }
 
   return (
     <div className="relative">
@@ -248,22 +267,29 @@ const Filter = () => {
                             </div>
                             {/* Lista de opciones con scroll */}
                             <div className="p-2 max-h-60 overflow-y-auto">
-                              {filterOptions[filterKey].map((option) => (
-                                <label
-                                  key={option}
-                                  className="flex items-center px-3 py-2 hover:bg-blue-50 rounded cursor-pointer transition-colors"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={filters[filterKey].includes(option)}
-                                    onChange={() => handleCheckboxChange(filterKey, option)}
-                                    className="w-4 h-4 text-paleta1-blue border-paleta1-blue-light rounded focus:ring-paleta1-blue focus:ring-2"
-                                  />
-                                  <span className="ml-3 text-sm text-gray-700">
-                                    {option}
-                                  </span>
-                                </label>
-                              ))}
+                              {filterOptions[filterKey].map((option) => {
+                                // Para kilometraje, mostrar valor formateado pero guardar valor real
+                                const displayValue = filterKey === 'kilometraje' 
+                                  ? kilometrajeDisplay[option] || option
+                                  : option;
+                                
+                                return (
+                                  <label
+                                    key={option}
+                                    className="flex items-center px-3 py-2 hover:bg-blue-50 rounded cursor-pointer transition-colors"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={filters[filterKey].includes(option)}
+                                      onChange={() => handleCheckboxChange(filterKey, option)}
+                                      className="w-4 h-4 text-paleta1-blue border-paleta1-blue-light rounded focus:ring-paleta1-blue focus:ring-2"
+                                    />
+                                    <span className="ml-3 text-sm text-gray-700">
+                                      {displayValue}
+                                    </span>
+                                  </label>
+                                );
+                              })}
                             </div>
                           </div>
                         </div>
@@ -280,24 +306,36 @@ const Filter = () => {
                     </h3>
                     {/* Tags de filtros activos con botón de eliminación */}
                     <div className="flex flex-wrap gap-2">
-                      {Object.entries(filters).map(([key, values]) =>
-                        values.map((value) => (
-                          <span
-                            key={`${key}-${value}`}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-paleta1-blue text-white text-xs rounded-full"
-                          >
-                            {getFilterLabel(key)}: {value}
-                            <button
-                              onClick={() => handleCheckboxChange(key, value)}
-                              className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
-                            >
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
-                          </span>
-                        ))
-                      )}
+                      {/* Mostrar en pantalla filtros activos */}
+                      {(() => {
+                        const tags = [];
+                        for (const key in filters) {
+                          filters[key].forEach((value) => {
+                            // Para kilometraje, mostrar valor formateado
+                            const displayValue = key === 'kilometraje' 
+                              ? kilometrajeDisplay[value] || value
+                              : value;
+                            
+                            tags.push(
+                              <span
+                                key={`${key}-${value}`}
+                                className="inline-flex items-center gap-1 px-2 py-1 bg-paleta1-blue text-white text-xs rounded-full"
+                              >
+                                {getFilterLabel(key)}: {displayValue}
+                                <button
+                                  onClick={() => handleCheckboxChange(key, value)}
+                                  className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                                >
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </span>
+                            );
+                          });
+                        }
+                        return tags;
+                      })()}
                     </div>
                   </div>
                 )}

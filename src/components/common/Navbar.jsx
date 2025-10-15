@@ -1,11 +1,21 @@
 //Nico
 import SearchBar from './SearchBar';
+<<<<<<< HEAD
 import { useState, useContext } from 'react';
 import LogInPopup from '../usuario/LogInPopup';
 import SignInPopup from '../usuario/SignInPopup';
 import { AuthContext } from '../../context/AuthContext';
 import cartService from '../../services/cartService';
 import Cart from './Cart';
+=======
+import Carrito from './Carrito';
+import { useState, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import LogInPopup from '../usuario/LogInPopup';
+import SignInPopup from '../usuario/SignInPopup';
+import { AuthContext } from '../../context/AuthContext';
+import carritoService from '../../services/carritoService';
+>>>>>>> a0d836845e1df7f39117d9713555ddaed61cf76d
 
 const Navbar = () => {
   const [visibleLogIn, setVisibleLogIn] = useState(false);
@@ -15,12 +25,37 @@ const Navbar = () => {
 
     const [visibleLogIn, setVisibleLogIn] = useState(false)
     const [visibleSignIn, setVisibleSignIn] = useState(false)
+    const [carritoOpen, setCarritoOpen] = useState(false)
+    const [cartCount, setCartCount] = useState(0)
     const { isAuthenticated, user, logout } = useContext(AuthContext);
 
+<<<<<<< HEAD
   const openSignIn = () => {
     setVisibleLogIn(false);
     setVisibleSignIn(true);
   };
+=======
+    // Actualizar contador del carrito
+    useEffect(() => {
+        const updateCartCount = () => {
+            setCartCount(carritoService.getCartCount());
+        };
+
+        updateCartCount();
+
+        // Actualizar cada vez que se abre/cierra el carrito
+        window.addEventListener('storage', updateCartCount);
+        
+        return () => {
+            window.removeEventListener('storage', updateCartCount);
+        };
+    }, [carritoOpen]);
+
+    const openSignIn = () => {
+        setVisibleLogIn(false)
+        setVisibleSignIn(true)
+    }
+>>>>>>> a0d836845e1df7f39117d9713555ddaed61cf76d
 
   const openLogIn = () => {
     setVisibleSignIn(false);
@@ -82,6 +117,7 @@ const Navbar = () => {
                         </div>
                     </div>
 
+<<<<<<< HEAD
             {/* Carrito de compras */}
             <div className="relative group">
               <div 
@@ -106,6 +142,117 @@ const Navbar = () => {
                 <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
               </div>
             </div>
+=======
+                    {/** Carrito */}
+                    <div className="relative group">
+                        <div className="flex items-center justify-center rounded-full size-8 hover:bg-blue-300 transition-all duration-200 ease-in-out">
+                            <button 
+                                className="text-white hover:cursor-pointer relative"
+                                onClick={() => setCarritoOpen(true)}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                                </svg>
+                                {/* Badge con contador */}
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+                        {/* Tooltip */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                            Carrito {cartCount > 0 && `(${cartCount})`}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                        </div>
+                    </div>
+
+                    {/* Componente Carrito */}
+                    <Carrito 
+                        isOpen={carritoOpen} 
+                        onClose={() => {
+                            setCarritoOpen(false);
+                            setCartCount(carritoService.getCartCount());
+                        }} 
+                    />
+
+                    {/** Perfil */}
+                    {isAuthenticated && (
+                        <div className="relative group">
+                            <div className="flex items-center justify-center rounded-full size-8 hover:bg-blue-300 transition-all duration-200 ease-in-out">
+                                <button 
+                                    className="text-white hover:cursor-pointer"
+                                    onClick={() => navigate('/perfil')}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            {/* Tooltip */}
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                                Mi Perfil
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/** Login/Logout */}
+                    {!isAuthenticated ? (
+                        // Si NO está autenticado, mostrar botón de login
+                        <div className="relative group"
+                        onClick={() => {setVisibleLogIn(true)}}
+                        >
+                            <div className="flex items-center justify-center rounded-full size-8 hover:bg-blue-300 transition-all duration-200 ease-in-out">
+                                <button className="text-white hover:cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M18 12l-3-3m0 0 3-3m-3 3h8.25" />
+                                    </svg>
+                                </button>
+                            </div>
+                            {visibleLogIn && <LogInPopup 
+                                                close={() => {setVisibleLogIn(false)}} 
+                                                openSignIn={() => {openSignIn()}}
+                                                />
+                            }
+                            {visibleSignIn && <SignInPopup 
+                                                close={() => {setVisibleSignIn(false)}}
+                                                openLogIn={() => {openLogIn()}}
+                                                />
+                            }
+                            {/* Tooltip */}
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                                Iniciar Sesión
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                            </div>
+                        </div>
+                    ) : (
+                        // Si SÍ está autenticado, mostrar nombre y logout
+                        <div className="flex items-center gap-3">
+                            <span className="text-white text-sm">
+                                Hola, {user?.nombre || user?.email}
+                            </span>
+                            <div className="relative group">
+                                <div className="flex items-center justify-center rounded-full size-8 hover:bg-blue-300 transition-all duration-200 ease-in-out">
+                                    <button 
+                                        className="text-white hover:cursor-pointer"
+                                        onClick={handleLogout}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                {/* Tooltip */}
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                                    Cerrar Sesión
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+>>>>>>> a0d836845e1df7f39117d9713555ddaed61cf76d
 
             {/* Perfil */}
             {!isAuthenticated ? (

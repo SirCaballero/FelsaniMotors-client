@@ -83,7 +83,7 @@ const ComentarioForm = ({
                         type="button"
                         onClick={handleCancel}
                         disabled={isSubmitting}
-                        className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:cursor-not-allowed transition-colors font-medium border border-gray-300"
+                        className="px-6 py-3 bg-paleta1-cream-light text-paleta1-blue rounded-xl hover:bg-paleta1-cream disabled:cursor-not-allowed transition-colors font-medium border border-paleta1-blue"
                     >
                         Cancelar
                     </button>
@@ -92,7 +92,7 @@ const ComentarioForm = ({
                 <button
                     type="submit"
                     disabled={isSubmitting || !texto.trim()}
-                    className="px-8 py-3 bg-gradient-to-r from-paleta1-blue to-paleta1-blue/90 text-white rounded-xl hover:from-paleta1-blue/90 hover:to-paleta1-blue disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg flex items-center gap-2"
+                    className="px-8 py-3 bg-paleta1-blue text-white rounded-xl hover:bg-paleta1-blue-light disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg flex items-center gap-2"
                 >
                     {isSubmitting ? (
                         <>

@@ -2,6 +2,7 @@
  * Constantes de mensajes de error para FelsaniMotors
  * Mapea las excepciones del backend a mensajes amigables para el usuario
  */
+import { useState } from 'react';
 
 // Mensajes de error para Autenticación y Login
 export const AUTH_ERRORS = {
@@ -216,7 +217,7 @@ export const getErrorMessage = (error) => {
  * @returns {Object} - Funciones y estado para manejar errores
  */
 export const useErrorHandler = () => {
-  const [error, setError] = React.useState(null);
+  const [error, setError] = useState(null);
 
   const handleError = (err) => {
     const errorInfo = getErrorMessage(err);

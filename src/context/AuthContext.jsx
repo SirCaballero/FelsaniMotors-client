@@ -12,6 +12,7 @@ export function AuthProvider({ children }) {
     const inicializarAuth = () => {
         const token = authService.getToken();
         const userData = authService.getUserData();
+        
         if (token) {
             setIsAuthenticated(true);
             setUser(userData);
@@ -49,7 +50,8 @@ export function AuthProvider({ children }) {
           nombre: userFromApi.nombre,
           apellido: userFromApi.apellido,
           telefono: userFromApi.telefono,
-          rol: userFromApi.rol
+          rol: userFromApi.rol,
+          activo: userFromApi.activo
         };
         
         authService.setUserData(userData);
@@ -97,7 +99,8 @@ export function AuthProvider({ children }) {
           nombre: userFromApi.nombre,
           apellido: userFromApi.apellido,
           telefono: userFromApi.telefono,
-          rol: userFromApi.rol
+          rol: userFromApi.rol,
+          activo: userFromApi.activo
         };
         
         authService.setUserData(userData);

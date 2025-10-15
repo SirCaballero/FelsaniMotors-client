@@ -38,6 +38,36 @@ const PublicacionForm = () => {
     const [fotoPrincipalIndex, setFotoPrincipalIndex] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Validar si el usuario está activo
+    if (!user?.activo) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+                <div className="bg-white border-2 border-red-500 rounded-xl p-8 max-w-md shadow-lg">
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L3.732 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-3">Cuenta Inactiva</h2>
+                        <p className="text-gray-600 mb-6">
+                            Tu cuenta está inactiva. No puedes crear publicaciones hasta que se active tu cuenta.
+                        </p>
+                        <p className="text-sm text-gray-500 mb-6">
+                            Contacta al administrador para activar tu cuenta.
+                        </p>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="px-6 py-2 bg-paleta1-blue text-white rounded-lg hover:bg-paleta1-blue-light transition-colors"
+                        >
+                            Volver al Inicio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     // Conexion a Back, con Bearer Token
 
     const AUTO_URL = "http://localhost:4002/api/autos";
@@ -379,7 +409,6 @@ const PublicacionForm = () => {
                         onChange={handleFotosChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
                     />
-                    <p className="text-sm text-gray-500 mt-1">Puedes seleccionar múltiples imágenes</p>
                 </div>
 
                 {fotos.length > 0 && (

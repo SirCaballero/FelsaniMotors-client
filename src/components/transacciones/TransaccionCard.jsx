@@ -2,21 +2,10 @@ import { useEffect, useState } from "react";
 import TransaccionEstado from "./TransaccionEstado";
 import authService from '../../services/authService';
 
-const TransaccionCard = ({idTransaccion}) => {
+const TransaccionCard = ({transaccion}) => {
 
     const [image, setImage] = useState("https://via.placeholder.com/300x200?text=Loading...");
-    const [transaccion, setTransaccion] = useState({
-        idTransaccion: "",
-        idPublicacion: "",
-        idComprador: "",
-        idVendedor: "",
-        monto: "",
-        metodoPago: "",
-        referenciaPago: "",
-        comentarios: "",
-        fechaTransaccion: "",
-        estado: ""
-    });
+    
     const [publicacion, setPublicacion] = useState({
         titulo: "",
         descripcion: "",
@@ -43,27 +32,7 @@ const TransaccionCard = ({idTransaccion}) => {
     });
 
     useEffect(() => {
-        const token = authService.getToken();
-        const headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', `Bearer ${token}`);
-
-        const URLTransaccion = `http://localhost:4002/api/transacciones/${idTransaccion}`;
-
-        fetch(URLTransaccion, {
-            method: "GET",
-            headers: headers
-        })
-        .then((response) => {
-            if(!response.ok) throw new Error("No se encontró la transacción");
-            return response.json();
-        })
-        .then((data) => setTransaccion(data))
-        .catch((error) => console.error('Error buscando la transacción: ', error));
-    }, [idTransaccion]);
-
-    useEffect(() => {
-        if (!transaccion.idPublicacion || !transaccion.idComprador || !transaccion.idVendedor) {
+        if (!transaccion?.idPublicacion || !transaccion?.idComprador || !transaccion?.idVendedor) {
             return; 
         }
 
