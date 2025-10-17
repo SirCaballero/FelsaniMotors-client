@@ -77,7 +77,7 @@ const Cart = ({ isOpen, onClose }) => {
                             ${item.precio}
                           </span>
                           <span className="text-green-700 font-semibold">
-                            ${item.precioConDescuento} (-10%)
+                            ${item.precioConDescuento} (-{Math.round(item.descuento * 100)}%)
                           </span>
                         </>
                       ) : (

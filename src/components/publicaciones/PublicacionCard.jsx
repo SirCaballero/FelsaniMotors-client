@@ -7,7 +7,11 @@ const PublicacionCard = ({ idPublicacion, titulo, ubicacion, precio, estado, mar
     const [image, setImage] = useState("https://via.placeholder.com/300x200?text=Loading...");
     const navigate = useNavigate();
     const { isAuthenticated, user } = useContext(AuthContext);
-    const DESCUENTO_OWNER = 0.10; // 10% de descuento para publicaciones del Owner
+    const descuentosPorOwner = {
+        1: 0.10,
+        3: 0.15,
+        5: 0.05,
+    }
 
     const handleClick = () => {
         navigate(`/publicacion/${idPublicacion}`);
@@ -62,12 +66,9 @@ const PublicacionCard = ({ idPublicacion, titulo, ubicacion, precio, estado, mar
         fetch(`http://localhost:4002/api/publicaciones/${idPublicacion}`)
         .then(response => response.json())
         .then(data => {
-        if (isAuthenticated && user?.idUsuario === idOwnerConDescuento) {
-            const nuevoPrecio = precio - (precio * DESCUENTO_OWNER);
-            setPrecioFinal(nuevoPrecio);
-        } else {
-            setPrecioFinal(precio);
-        }
+        const descuento = descuentosPorOwner[data?.userOwnerId] || 0;
+        const nuevoPrecio = precio - (precio * descuento);
+        setPrecioFinal(nuevoPrecio);
         })
         .catch(() => setPrecioFinal(precio));
     }, [idPublicacion, precio]);
