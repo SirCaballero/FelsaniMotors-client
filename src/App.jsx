@@ -9,11 +9,18 @@ import Publicacion from './components/publicaciones/Publicacion'
 import TransaccionForm from './components/transacciones/TransaccionForm'
 import TransaccionList from './components/transacciones/TransaccionList'
 import ProtectedRoute from './components/common/ProtectedRoute'
+import AdminRoute from './components/common/AdminRoute'
 import UsuarioPerfil from './components/usuario/UsuarioPerfil'
 import UsuarioActualizacion from './components/usuario/UsuarioActualizacion'
 import CambioContraseña from './components/usuario/CambioContraseña'
 import UsuarioPublicaciones from './components/usuario/UsuarioPublicaciones'
 import UsuarioTransacciones from './components/usuario/UsuarioTransacciones'
+import AdminDashboard from './views/AdminDashboard'
+import UsuariosAdmin from './components/admin/UsuariosAdmin'
+import PublicacionesAdmin from './components/admin/PublicacionesAdmin'
+import TransaccionesAdmin from './components/admin/TransaccionesAdmin'
+import AutosAdmin from './components/admin/AutosAdmin'
+import ComentariosAdmin from './components/admin/ComentariosAdmin'
 
 function App() {
   return (
@@ -87,6 +94,56 @@ function App() {
               <ProtectedRoute>
                 <UsuarioTransacciones />
               </ProtectedRoute>
+            } 
+          />
+
+          {/* Rutas de administración */}
+          <Route 
+            path="/admin" 
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/usuarios" 
+            element={
+              <AdminRoute>
+                <UsuariosAdmin />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/publicaciones" 
+            element={
+              <AdminRoute>
+                <PublicacionesAdmin />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/transacciones" 
+            element={
+              <AdminRoute>
+                <TransaccionesAdmin />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/autos" 
+            element={
+              <AdminRoute>
+                <AutosAdmin />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/comentarios" 
+            element={
+              <AdminRoute>
+                <ComentariosAdmin />
+              </AdminRoute>
             } 
           />
         </Routes>
