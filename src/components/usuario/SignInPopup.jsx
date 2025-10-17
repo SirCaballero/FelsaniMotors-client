@@ -89,9 +89,8 @@ const SignInPopup = ({ close, openLogIn }) => {
                   name="nombre"
                   value={formData.nombre}
                   onChange={handleChange}
-                  required
                   className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
-                  placeholder="..."
+                  placeholder="Juan"
                 />
               </div>
 
@@ -104,9 +103,8 @@ const SignInPopup = ({ close, openLogIn }) => {
                   name="apellido"
                   value={formData.apellido}
                   onChange={handleChange}
-                  required
                   className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
-                  placeholder="..."
+                  placeholder="Pérez"
                 />
               </div>
             </div>
@@ -120,9 +118,8 @@ const SignInPopup = ({ close, openLogIn }) => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                required
                 className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
-                placeholder="..."
+                placeholder="ejemplo@gmail.com"
               />
             </div>
 
@@ -135,9 +132,8 @@ const SignInPopup = ({ close, openLogIn }) => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                required
                 className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
-                placeholder="••••••••"
+                placeholder="contraseña"
               />
             </div>
 
@@ -150,9 +146,8 @@ const SignInPopup = ({ close, openLogIn }) => {
                 name="telefono"
                 value={formData.telefono}
                 onChange={handleChange}
-                required
                 className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
-                placeholder="..."
+                placeholder="1122334455"
               />
             </div>
 

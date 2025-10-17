@@ -9,6 +9,19 @@ const PublicacionForm = () => {
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
 
+    // Opciones predefinidas para dropdowns
+    const marcasDisponibles = [
+        "Toyota", "Volkswagen", "Ford", "Chevrolet", "Honda", "Nissan", 
+        "Renault", "Peugeot", "Fiat", "Mercedes-Benz", "BMW", "Audi",
+        "Hyundai", "Kia", "Mazda", "Jeep", "Citroën", "Suzuki", "Otra"
+    ];
+
+    const estadosDisponibles = ["Nuevo", "Usado", "Certificado"];
+
+    const combustiblesDisponibles = ["Nafta", "Diesel", "GNC", "Eléctrico", "Híbrido"];
+
+    const tiposCajaDisponibles = ["Manual", "Automática", "Semiautomática"];
+
     // Estructura JSON de los endpoints
 
     const [autoData, setAutoData] = useState({
@@ -226,19 +239,22 @@ const PublicacionForm = () => {
 
     return (
         <div className="px-10 border-gray-300">
-            <h2 className="justify-center text-center">Crear Nueva Publicación</h2>
+            <h2 className="justify-center text-center text-4xl font-bold text-paleta1-blue my-6">Crear Nueva Publicación</h2>
             <form onSubmit={handleSubmit}>
                 <h3 className="text-xl ">Datos del Auto</h3>
                 <div className="mb-4">
                     <label className="block text-gray-700 font-medium mb-2">Marca:</label>
-                    <input
-                        type="text"
+                    <select
                         name="marca"
                         value={autoData.marca}
                         onChange={handleAutoChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
-                    />
+                    >
+                        <option value="">Seleccionar marca</option>
+                        {marcasDisponibles.map((marca) => (
+                            <option key={marca} value={marca}>{marca}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="mb-4">
                     <label className="block text-gray-700 font-medium mb-2">Modelo:</label>
@@ -248,7 +264,6 @@ const PublicacionForm = () => {
                         value={autoData.modelo}
                         onChange={handleAutoChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
                     />
                 </div>
                 <div className="mb-4">
@@ -259,19 +274,21 @@ const PublicacionForm = () => {
                         value={autoData.anio}
                         onChange={handleAutoChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
                     />
                 </div>
                 <div className="mb-4">
                     <label className="block text-gray-700 font-medium mb-2">Estado:</label>
-                    <input
-                        type="text"
+                    <select
                         name="estado"
                         value={autoData.estado}
                         onChange={handleAutoChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
-                    />
+                    >
+                        <option value="">Seleccionar estado</option>
+                        {estadosDisponibles.map((estado) => (
+                            <option key={estado} value={estado}>{estado}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="mb-4">
                     <label className="block text-gray-700 font-medium mb-2">Kilometraje:</label>
@@ -281,19 +298,21 @@ const PublicacionForm = () => {
                         value={autoData.kilometraje}
                         onChange={handleAutoChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
                     />
                 </div>
                 <div className="mb-4">
                     <label className="block text-gray-700 font-medium mb-2">Combustible:</label>
-                    <input
-                        type="text"
+                    <select
                         name="combustible"
                         value={autoData.combustible}
                         onChange={handleAutoChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
-                    />
+                    >
+                        <option value="">Seleccionar combustible</option>
+                        {combustiblesDisponibles.map((combustible) => (
+                            <option key={combustible} value={combustible}>{combustible}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="mb-4">
                     <label className="block text-gray-700 font-medium mb-2">Tipo Categoría:</label>
@@ -303,7 +322,6 @@ const PublicacionForm = () => {
                         value={autoData.tipoCategoria}
                         onChange={handleAutoChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
                     />
                 </div>
                 <div className="mb-4">
@@ -314,19 +332,21 @@ const PublicacionForm = () => {
                         value={autoData.capacidadTanque}
                         onChange={handleAutoChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
                     />
                 </div>
                 <div className="mb-4">
                     <label className="block text-gray-700 font-medium mb-2">Tipo Caja:</label>
-                    <input
-                        type="text"
+                    <select
                         name="tipoCaja"
                         value={autoData.tipoCaja}
                         onChange={handleAutoChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
-                    />
+                    >
+                        <option value="">Seleccionar tipo de caja</option>
+                        {tiposCajaDisponibles.map((tipo) => (
+                            <option key={tipo} value={tipo}>{tipo}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="mb-4">
                     <label className="block text-gray-700 font-medium mb-2">Motor:</label>
@@ -336,7 +356,6 @@ const PublicacionForm = () => {
                         value={autoData.motor}
                         onChange={handleAutoChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
                     />
                 </div>
 
@@ -349,7 +368,6 @@ const PublicacionForm = () => {
                         value={publicacionData.titulo}
                         onChange={handlePublicacionChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
                     />
                 </div>
                 <div className="mb-4">
@@ -360,7 +378,6 @@ const PublicacionForm = () => {
                         onChange={handlePublicacionChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
                         rows="4"
-                        required
                     />
                 </div>
                 <div className="mb-4">
@@ -371,7 +388,7 @@ const PublicacionForm = () => {
                         value={publicacionData.ubicacion}
                         onChange={handlePublicacionChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
+                        placeholder="Ej: Buenos Aires, CABA"
                     />
                 </div>
                 <div className="mb-4">
@@ -382,7 +399,6 @@ const PublicacionForm = () => {
                         value={publicacionData.precio}
                         onChange={handlePublicacionChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
-                        required
                     />
                 </div>
                 <div className="mb-4">
@@ -394,7 +410,6 @@ const PublicacionForm = () => {
                         onChange={handlePublicacionChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paleta1-blue"
                         placeholder="Ej: Efectivo, transferencia, financiación"
-                        required
                     />
                 </div>
 

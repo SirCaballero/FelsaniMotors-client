@@ -31,6 +31,24 @@ const UsuarioActualizacion = () => {
     
     const URLModificarUsuario = `http://localhost:4002/api/usuarios/${user?.idUsuario}`;
     
+    // Filtrar solo los campos que no están vacíos
+    const dataToUpdate = {};
+    if (modUsuarioData.nombre.trim() !== "") {
+      dataToUpdate.nombre = modUsuarioData.nombre;
+    }
+    if (modUsuarioData.apellido.trim() !== "") {
+      dataToUpdate.apellido = modUsuarioData.apellido;
+    }
+    if (modUsuarioData.telefono.trim() !== "") {
+      dataToUpdate.telefono = modUsuarioData.telefono;
+    }
+
+    // Si no hay campos para actualizar, mostrar mensaje
+    if (Object.keys(dataToUpdate).length === 0) {
+      alert("No has ingresado ningún campo para actualizar");
+      return;
+    }
+    
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
     headers.append("Authorization", `Bearer ${token}`);
@@ -38,7 +56,7 @@ const UsuarioActualizacion = () => {
     fetch(URLModificarUsuario, {
       method: "PUT",
       headers: headers,
-      body: JSON.stringify(modUsuarioData),
+      body: JSON.stringify(dataToUpdate),
     })
       .then((response) => {
         if (!response.ok) throw new Error("No se pudo actualizar el usuario.");

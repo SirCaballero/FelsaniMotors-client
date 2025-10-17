@@ -69,9 +69,8 @@ const LogInPopup = ({ close, openSignIn }) => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
                 className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
-                placeholder="..."
+                placeholder="ejemplo@gmail.com"
               />
             </div>
 
@@ -83,9 +82,8 @@ const LogInPopup = ({ close, openSignIn }) => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
                 className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
-                placeholder="••••••••"
+                placeholder="contraseña"
               />
             </div>
 
