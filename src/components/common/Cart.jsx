@@ -11,6 +11,29 @@ const Cart = ({ isOpen, onClose }) => {
       setCartItems(items);
       setTotal(cartService.calculateTotal());
     }
+
+    const idOwnerConDescuento = 1;
+      const DESCUENTO_OWNER = 0.10;
+
+      const itemsConDescuento = items.map(item => {
+        if (item.idOwner === idOwnerConDescuento) {
+          return {
+            ...item,
+            precioConDescuento: item.precio - (item.precio * DESCUENTO_OWNER),
+          };
+        }
+        return { ...item, precioConDescuento: item.precio };
+      });
+
+      setCartItems(itemsConDescuento);
+
+      const totalCalculado = itemsConDescuento.reduce(
+        (acc, item) => acc + (item.precioConDescuento * (item.quantity || 1)),
+        0
+      );
+      setTotal(totalCalculado);
+    
+
   }, [isOpen]);
 
   const handleRemove = (idPublicacion) => {
@@ -47,7 +70,21 @@ const Cart = ({ isOpen, onClose }) => {
                   <div>
                     <p className="font-medium">{item.titulo}</p>
                     <p className="text-sm text-gray-600">{item.marcaAuto} {item.modeloAuto}</p>
-                    <p className="text-sm">${item.precio} ARS x {item.quantity || 1}</p>
+                    <p className="text-sm">
+                      {item.precioConDescuento !== item.precio ? (
+                        <>
+                          <span className="line-through text-gray-500 mr-1">
+                            ${item.precio}
+                          </span>
+                          <span className="text-green-700 font-semibold">
+                            ${item.precioConDescuento} (-10%)
+                          </span>
+                        </>
+                      ) : (
+                        <>${item.precio}</>
+                      )}
+                      {" "}ARS x {item.quantity || 1}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">${(item.precio * (item.quantity || 1)).toLocaleString()}</span>
@@ -74,6 +111,7 @@ const Cart = ({ isOpen, onClose }) => {
                 Proceder al Pago
               </button>
             </div>
+            
           </>
         )}
       </div>

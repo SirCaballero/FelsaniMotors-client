@@ -7,6 +7,7 @@ const PublicacionCard = ({ idPublicacion, titulo, ubicacion, precio, estado, mar
     const [image, setImage] = useState("https://via.placeholder.com/300x200?text=Loading...");
     const navigate = useNavigate();
     const { isAuthenticated, user } = useContext(AuthContext);
+    const DESCUENTO_OWNER = 0.10; // 10% de descuento para publicaciones del Owner
 
     const handleClick = () => {
         navigate(`/publicacion/${idPublicacion}`);
@@ -55,7 +56,21 @@ const PublicacionCard = ({ idPublicacion, titulo, ubicacion, precio, estado, mar
         .catch(error => { 
             console.error('Error cargando imagen:', error);
         });
-    }, [idPublicacion]);
+
+        const idOwnerConDescuento = 1;
+
+        fetch(`http://localhost:4002/api/publicaciones/${idPublicacion}`)
+        .then(response => response.json())
+        .then(data => {
+        if (isAuthenticated && user?.idUsuario === idOwnerConDescuento) {
+            const nuevoPrecio = precio - (precio * DESCUENTO_OWNER);
+            setPrecioFinal(nuevoPrecio);
+        } else {
+            setPrecioFinal(precio);
+        }
+        })
+        .catch(() => setPrecioFinal(precio));
+    }, [idPublicacion, precio]);
 
     return(
         <div 
@@ -75,9 +90,23 @@ const PublicacionCard = ({ idPublicacion, titulo, ubicacion, precio, estado, mar
             <div className="p-4">
                 {/* Precio */}
                 <div className="mb-2">
-                    <span className="text-2xl font-bold text-gray-900">
+                    {precioFinal !== precio ? (
+                        <>
+                        <span className="text-sm text-gray-500 line-through mr-2">
+                            ${precio?.toLocaleString()}
+                        </span>
+                        <span className="text-2xl font-bold text-green-700">
+                            ${precioFinal?.toLocaleString()}
+                        </span>
+                        <span className="text-xs text-green-600 ml-1 font-medium">
+                            (-{DESCUENTO_OWNER * 100}%)
+                        </span>
+                        </>
+                    ) : (
+                        <span className="text-2xl font-bold text-gray-900">
                         ${precio?.toLocaleString()}
-                    </span>
+                        </span>
+                    )}
                     <span className="text-sm text-gray-500 ml-1">ARS</span>
                 </div>
 
