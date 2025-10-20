@@ -19,6 +19,7 @@ const UsuarioTransacciones = () => {
     headers.append("Content-Type", "application/json");
     headers.append("Authorization", `Bearer ${token}`);
 
+    // Obtener transacciones específicas del usuario
     const URL_TRANSACCIONES = `http://localhost:4002/api/transacciones/usuario/${user.idUsuario}`;
 
     fetch(URL_TRANSACCIONES, { method: "GET", headers: headers })
@@ -34,10 +35,11 @@ const UsuarioTransacciones = () => {
       .then((data) => {
         if (data) {
           setTransacciones(data);
+          console.log(`✅ Transacciones del usuario ${user.idUsuario}:`, data);
         }
       })
       .catch((error) => {
-        console.error("Error: ", error);
+        console.error("Error al cargar transacciones: ", error);
       });
   }, [user]);
 

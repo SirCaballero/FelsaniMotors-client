@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const PublicacionDestacada = ({ publicacion }) => {
-    const [image, setImage] = useState("https://via.placeholder.com/800x400?text=Loading...");
+    const [image, setImage] = useState("");
     const navigate = useNavigate();
 
     const handleClick = () => {
@@ -15,41 +15,40 @@ const PublicacionDestacada = ({ publicacion }) => {
             'V': 'Vendido',
             'P': 'Pausado'
         };
-        return estadosMap[estado] || 'Disponible';
+        return estadosMap[estado];
     };
     
     useEffect(() => {
-        if (publicacion?.idPublicacion) {
-            fetch(`http://localhost:4002/api/publicaciones/${publicacion.idPublicacion}/fotos-contenido`)
-                .then(response => {
-                    if (!response.ok) { 
-                        throw new Error('No se encontraron imágenes')
-                    }
-                    return response.json()
-                })
-                .then(data => {
-                    setImage(`data:image/jpeg;base64,${data[0].file}`)
-                })
-                .catch(error => { 
-                    console.error('Error cargando imagen:', error)
-                });
-        }
-    }, [publicacion?.idPublicacion]);
+        fetch(`http://localhost:4002/api/publicaciones/${publicacion.idPublicacion}/fotos-contenido`)
+            .then(response => response.json())
+            .then(data => {
+                setImage(`data:image/jpeg;base64,${data[0].file}`)
+            })
+            .catch(error => { 
+                console.error('Error cargando imagen:', error)
+            });
+    }, [publicacion.idPublicacion]);
 
     return(
         <div 
-            className="bg-white rounded-xl shadow-lg overflow-hidden mb-8 mx-4 cursor-pointer hover:shadow-xl transition-shadow duration-300 border border-paleta1-cream"
+            className="bg-white rounded-xl overflow-hidden mb-8 mx-4 cursor-pointer border border-paleta1-cream"
             onClick={handleClick}>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
                 {/* Imagen */}
                 <div className="relative">
-                    <img 
-                        src={image} 
-                        alt={publicacion.titulo} 
-                        className="w-full h-80 lg:h-96 object-cover rounded-lg border border-paleta1-cream"
-                    />
-                    <div className="absolute top-4 left-4 bg-paleta1-blue text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                    {image ? (
+                        <img 
+                            src={image} 
+                            alt={publicacion.titulo} 
+                            className="w-full h-80 lg:h-96 object-cover rounded-lg border border-paleta1-cream"
+                        />
+                    ) : (
+                        <div className="w-full h-80 lg:h-96 bg-gray-200 rounded-lg border border-paleta1-cream flex items-center justify-center">
+                            <span className="text-gray-400 text-lg">Sin imagen</span>
+                        </div>
+                    )}
+                    <div className="absolute top-4 left-4 bg-paleta1-blue text-white px-3 py-1 rounded-full text-sm font-bold">
                         DESTACADO
                     </div>
                 </div>
@@ -92,7 +91,7 @@ const PublicacionDestacada = ({ publicacion }) => {
                             e.stopPropagation();
                             handleClick();
                         }}
-                        className="w-full bg-paleta1-blue hover:bg-paleta1-blue-light text-white font-bold py-3 px-6 rounded-lg transition duration-300 shadow-lg"
+                        className="w-full bg-paleta1-blue text-white font-bold py-3 px-6 rounded-lg"
                     >
                         Ver Detalles
                     </button>

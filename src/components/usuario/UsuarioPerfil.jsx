@@ -33,12 +33,12 @@ const UsuarioPerfil = () => {
         return response.json();
       })
       .then((data) => setUsuarioData(data))
-      .catch((error) => console.error("Error: ", error));
+      .catch(() => {});
   }, [user?.idUsuario, token]);
 
   return (
     <div className="bg-white flex justify-center items-start py-10">
-      <div className="bg-white border border-[#cbdceb] shadow-md rounded-2xl p-6 max-w-3xl w-full">
+      <div className="bg-white border border-[#cbdceb] rounded-2xl p-6 max-w-3xl w-full">
         <div className="flex items-center justify-between mb-6 border-b border-[#cbdceb] pb-4">
           <h3 className="text-2xl font-semibold text-gray-800">
             {usuarioData.nombre} {usuarioData.apellido}
@@ -54,23 +54,19 @@ const UsuarioPerfil = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-700">
           <div>
             <p className="text-sm text-gray-500">E-mail</p>
-            <p className="font-medium">{usuarioData.email}</p>
+            <p>{usuarioData.email}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Teléfono</p>
-            <p className="font-medium">{usuarioData.telefono}</p>
+            <p>{usuarioData.telefono}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Rol</p>
-            <p className="font-medium">{usuarioData.rol}</p>
+            <p>{usuarioData.rol}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Activo</p>
-            <p
-              className={`font-medium ${
-                usuarioData.activo ? "text-green-600" : "text-red-600"
-              }`}
-            >
+            <p>
               {usuarioData.activo ? "Sí" : "No"}
             </p>
           </div>

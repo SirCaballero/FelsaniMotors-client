@@ -15,7 +15,8 @@ const Filter = () => {
     combustible: [],
     tipoCategoria: [],
     tipoCaja: [],
-    motor: []
+    motor: [],
+    estadoPublicacion: []
   });
 
   const [filterOptions, setFilterOptions] = useState({
@@ -27,7 +28,8 @@ const Filter = () => {
     combustible: [],
     tipoCategoria: [],
     tipoCaja: [],
-    motor: []
+    motor: [],
+    estadoPublicacion: ['A', 'V', 'P']
   });
 
   // Mapeo para mostrar valores formateados en UI pero enviar valores correctos al backend
@@ -37,6 +39,13 @@ const Filter = () => {
     '100000-150000': '100.000-150.000 km',
     '150000-200000': '150.000-200.000 km',
     '200000-999999999': '200.000+ km'
+  };
+
+  // Mapeo para mostrar estados de publicación en español
+  const estadoPublicacionDisplay = {
+    'A': 'Activa',
+    'V': 'Vendida',
+    'P': 'Pausada'
   };
 
   useEffect(() => {
@@ -52,10 +61,11 @@ const Filter = () => {
           combustible: data.combustibles || [],
           tipoCategoria: data.tipoCategorias || [],
           tipoCaja: data.tipoCajas || [],
-          motor: data.motores || []
+          motor: data.motores || [],
+          estadoPublicacion: ['A', 'V', 'P']
         });
       })
-      .catch(error => console.error('Error cargando opciones de filtros:', error));
+      .catch(() => {});
   }, []);
 
   const [openDropdowns, setOpenDropdowns] = useState({});
@@ -98,7 +108,8 @@ const Filter = () => {
       combustible: [],
       tipoCategoria: [],
       tipoCaja: [],
-      motor: []
+      motor: [],
+      estadoPublicacion: []
     });
   };
 
@@ -130,7 +141,8 @@ const Filter = () => {
       combustible: 'Combustible',
       tipoCategoria: 'Categoría',
       tipoCaja: 'Tipo de Caja',
-      motor: 'Motor'
+      motor: 'Motor',
+      estadoPublicacion: 'Estado Publicación'
     };
     return labels[key] || key;
   };
@@ -268,10 +280,13 @@ const Filter = () => {
                             {/* Lista de opciones con scroll */}
                             <div className="p-2 max-h-60 overflow-y-auto">
                               {filterOptions[filterKey].map((option) => {
-                                // Para kilometraje, mostrar valor formateado pero guardar valor real
-                                const displayValue = filterKey === 'kilometraje' 
-                                  ? kilometrajeDisplay[option] || option
-                                  : option;
+                                // Para kilometraje y estadoPublicacion, mostrar valor formateado pero guardar valor real
+                                let displayValue = option;
+                                if (filterKey === 'kilometraje') {
+                                  displayValue = kilometrajeDisplay[option] || option;
+                                } else if (filterKey === 'estadoPublicacion') {
+                                  displayValue = estadoPublicacionDisplay[option] || option;
+                                }
                                 
                                 return (
                                   <label
@@ -311,10 +326,13 @@ const Filter = () => {
                         const tags = [];
                         for (const key in filters) {
                           filters[key].forEach((value) => {
-                            // Para kilometraje, mostrar valor formateado
-                            const displayValue = key === 'kilometraje' 
-                              ? kilometrajeDisplay[value] || value
-                              : value;
+                            // Para kilometraje y estadoPublicacion, mostrar valor formateado
+                            let displayValue = value;
+                            if (key === 'kilometraje') {
+                              displayValue = kilometrajeDisplay[value] || value;
+                            } else if (key === 'estadoPublicacion') {
+                              displayValue = estadoPublicacionDisplay[value] || value;
+                            }
                             
                             tags.push(
                               <span

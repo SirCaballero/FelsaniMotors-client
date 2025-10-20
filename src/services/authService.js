@@ -35,7 +35,6 @@ const authService = {
             authService.setToken(data.access_token);
             return data })
         .catch((error) => {
-            console.error('Error en login:', error);
             throw error })
         
         )
@@ -68,7 +67,6 @@ const authService = {
             authService.setToken(data.access_token);
             return data })
         .catch((error) => {
-            console.error('Error en registro:', error);
             throw error })
 
         )

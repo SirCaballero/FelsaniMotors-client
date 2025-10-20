@@ -1,8 +1,7 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 
 const SignInPopup = ({ close, openLogIn }) => {
-  const [visible, setVisible] = useState(false);
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -10,12 +9,8 @@ const SignInPopup = ({ close, openLogIn }) => {
     password: '',
     telefono: '',
   });
-  
-  const { register } = useContext(AuthContext);
 
-  useEffect(() => {
-    setVisible(true);
-  }, []);
+  const { register } = useContext(AuthContext);
 
   const handleChange = (e) => {
     setFormData({
@@ -25,12 +20,22 @@ const SignInPopup = ({ close, openLogIn }) => {
   };
 
   const handleClose = () => {
-    setVisible(false);
-    setTimeout(close, 200);
+    close();
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const emailValidation = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailValidation.test(formData.email)) {
+      alert('Por favor, ingresa un email válido (ejemplo: usuario@gmail.com)');
+      return;
+    }
+
+    if (!formData.nombre || !formData.apellido || !formData.password || !formData.telefono) {
+      alert('Por favor, completa todos los campos');
+      return;
+    }
 
     register(
       formData.email,
@@ -39,32 +44,25 @@ const SignInPopup = ({ close, openLogIn }) => {
       formData.apellido,
       parseInt(formData.telefono),
       'USER'
-    )
-      .then((result) => {
-        if (result.success) {
-          handleClose();
-        }
-      });
+    ).then((result) => {
+      if (result.success) {
+        handleClose();
+      }
+    });
   };
 
   return (
     <div>
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 ${
-          visible ? 'opacity-100' : 'opacity-0'
-        }`}
+        className="fixed inset-0 bg-gray-600/40 z-40"
         onClick={handleClose}
       ></div>
 
-      {/* Contenedor del popup */}
       <div className="fixed inset-0 flex justify-center items-center z-50">
         <div
-          className={`bg-[#e8decb] rounded-md shadow-md w-[380px] p-6 relative border border-gray-200 transform transition-all duration-300 ${
-            visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-          }`}
+          className="bg-[#e8decb] rounded-md shadow-md w-[380px] p-6 relative border border-gray-200"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Botón de cerrar */}
           <button
             className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"
             onClick={handleClose}
@@ -72,12 +70,10 @@ const SignInPopup = ({ close, openLogIn }) => {
             ×
           </button>
 
-          {/* Título */}
           <h2 className="text-xl font-semibold text-center mb-6 text-[#6c94c4]">
             Crear cuenta
           </h2>
 
-          {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex gap-3">
               <div className="flex-1">
@@ -89,8 +85,9 @@ const SignInPopup = ({ close, openLogIn }) => {
                   name="nombre"
                   value={formData.nombre}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
-                  placeholder="Juan"
+                  className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none"
+                  placeholder="Nombre"
+                  required
                 />
               </div>
 
@@ -103,8 +100,9 @@ const SignInPopup = ({ close, openLogIn }) => {
                   name="apellido"
                   value={formData.apellido}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
-                  placeholder="Pérez"
+                  className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none"
+                  placeholder="Apellido"
+                  required
                 />
               </div>
             </div>
@@ -118,8 +116,9 @@ const SignInPopup = ({ close, openLogIn }) => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
+                className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none"
                 placeholder="ejemplo@gmail.com"
+                required
               />
             </div>
 
@@ -132,8 +131,10 @@ const SignInPopup = ({ close, openLogIn }) => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
+                className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none"
                 placeholder="contraseña"
+                required
+                minLength="6"
               />
             </div>
 
@@ -146,25 +147,25 @@ const SignInPopup = ({ close, openLogIn }) => {
                 name="telefono"
                 value={formData.telefono}
                 onChange={handleChange}
-                className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#6c94c4]"
+                className="w-full border border-gray-300 bg-[#f2f5f6] rounded px-3 py-2 focus:outline-none"
                 placeholder="1122334455"
+                required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-[#6c94c4] text-white py-2 rounded hover:bg-[#4e78a5] transition"
+              className="w-full bg-[#6c94c4] text-white py-2 rounded hover:bg-[#4e78a5]"
             >
               Registrarse
             </button>
           </form>
 
-          {/* Volver al login */}
           <button
-            className="mt-4 w-full bg-gray-100 text-gray-700 py-2 rounded hover:bg-gray-200 transition"
+            className="mt-4 w-full bg-gray-100 text-gray-700 py-2 rounded hover:bg-gray-200"
             onClick={() => {
               handleClose();
-              setTimeout(openLogIn, 200);
+              openLogIn();
             }}
           >
             Ya tengo una cuenta

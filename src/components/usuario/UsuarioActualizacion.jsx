@@ -31,7 +31,7 @@ const UsuarioActualizacion = () => {
     
     const URLModificarUsuario = `http://localhost:4002/api/usuarios/${user?.idUsuario}`;
     
-    // Filtrar solo los campos que no están vacíos
+    
     const dataToUpdate = {};
     if (modUsuarioData.nombre.trim() !== "") {
       dataToUpdate.nombre = modUsuarioData.nombre;
@@ -43,7 +43,7 @@ const UsuarioActualizacion = () => {
       dataToUpdate.telefono = modUsuarioData.telefono;
     }
 
-    // Si no hay campos para actualizar, mostrar mensaje
+    
     if (Object.keys(dataToUpdate).length === 0) {
       alert("No has ingresado ningún campo para actualizar");
       return;
@@ -66,14 +66,14 @@ const UsuarioActualizacion = () => {
         alert("Perfil actualizado correctamente");
         navigate('/perfil');
       })
-      .catch((error) => console.error("Error: ", error));
+      .catch(() => {});
   };
 
   return (
-    <div className="bg-[#f5efe6] min-h-screen flex justify-center items-start py-10">
+    <div className="bg-white min-h-screen flex justify-center items-start py-10">
       <form
         onSubmit={handleActualizacion}
-        className="bg-white border border-[#cbdceb] shadow-md rounded-2xl p-6 w-full max-w-md"
+        className="bg-white border border-[#cbdceb] rounded-2xl p-6 w-full max-w-md"
       >
         <h3 className="text-2xl font-semibold text-gray-800 mb-1">
           Actualiza tu información
@@ -88,7 +88,7 @@ const UsuarioActualizacion = () => {
             <input
               name="nombre"
               type="text"
-              placeholder="..."
+              placeholder="Nombre"
               value={modUsuarioData.nombre}
               onChange={handleChange}
               className="w-full border border-[#cbdceb] rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#cbdceb]"
@@ -99,7 +99,7 @@ const UsuarioActualizacion = () => {
             <input
               name="apellido"
               type="text"
-              placeholder="..."
+              placeholder="Apellido"
               value={modUsuarioData.apellido}
               onChange={handleChange}
               className="w-full border border-[#cbdceb] rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#cbdceb]"
@@ -109,8 +109,8 @@ const UsuarioActualizacion = () => {
             <label className="block text-gray-700 mb-1">Teléfono</label>
             <input
               name="telefono"
-              type="text"
-              placeholder="..."
+              type="tel"
+              placeholder="1122334455"
               value={modUsuarioData.telefono}
               onChange={handleChange}
               className="w-full border border-[#cbdceb] rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#cbdceb]"

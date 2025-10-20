@@ -13,9 +13,9 @@ const Publicacion = () => {
     const [publicacion, setPublicacion] = useState(null);
     const [imagenes, setImagenes] = useState([]);
     const [imagenSeleccionada, setImagenSeleccionada] = useState(0);
-    const [mostrarModal, setMostrarModal] = useState(false);
     const [error, setError] = useState(null);
     const [isInCart, setIsInCart] = useState(false);
+    const [editarVisible, setEditarVisible] = useState(false);
 
     const formatearEstado = (estado) => {
         const estadosMap = {
@@ -23,11 +23,10 @@ const Publicacion = () => {
             'V': 'Vendido',
             'P': 'Pausado'
         };
-        return estadosMap[estado] || estado || 'Disponible';
+        return estadosMap[estado];
     };
 
     const formatearFecha = (fecha) => {
-        if (!fecha) return '';
         const date = new Date(fecha);
         return date.toLocaleDateString('es-ES', { 
             year: 'numeric', 
@@ -59,13 +58,13 @@ const Publicacion = () => {
             estado: publicacion.estado,
             marcaAuto: publicacion.marcaAuto,
             modeloAuto: publicacion.modeloAuto,
-            imagen: imagenes.length > 0 ? imagenes[0] : "https://via.placeholder.com/300x200?text=No+Image"
+            imagen: imagenes.length > 0 ? imagenes[0] : ""
         };
 
         const result = carritoService.addToCart(item);
         if (result.success) {
             setIsInCart(true);
-            alert("✅ Auto agregado al carrito");
+            alert("Auto agregado al carrito");
         } else {
             alert(result.message);
         }
@@ -84,6 +83,13 @@ const Publicacion = () => {
             })
             .then((data) => {
                 publicacionData = data;
+                
+                // Verificar si el usuario es el dueño de la publicación
+                if(isAuthenticated && user && publicacionData) {
+                    if(user.idUsuario === publicacionData.idUsuario) {
+                        setEditarVisible(true);
+                    }
+                }
                 
                 // Si hay idAuto, obtener datos del auto
                 if (data.idAuto) {
@@ -132,49 +138,38 @@ const Publicacion = () => {
                 }
             })
             .catch((err) => {
-                console.error("❌ Error:", err);
                 setError(err.message);
             });
-    }, [idPublicacion]);
+    }, [idPublicacion, isAuthenticated, user]);
 
     // Verificar si el item está en el carrito
     useEffect(() => {
-        if (idPublicacion) {
-            setIsInCart(carritoService.isInCart(idPublicacion));
-        }
+        setIsInCart(carritoService.isInCart(idPublicacion));
     }, [idPublicacion]);
-
-    // Navegación con teclado en el modal
-    useEffect(() => {
-        if (!mostrarModal) return;
-
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape') {
-                setMostrarModal(false);
-            } else if (e.key === 'ArrowLeft' && imagenes.length > 1) {
-                setImagenSeleccionada(imagenSeleccionada > 0 ? imagenSeleccionada - 1 : imagenes.length - 1);
-            } else if (e.key === 'ArrowRight' && imagenes.length > 1) {
-                setImagenSeleccionada(imagenSeleccionada < imagenes.length - 1 ? imagenSeleccionada + 1 : 0);
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [mostrarModal, imagenSeleccionada, imagenes.length]);
 
     if (error) {
         return (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center shadow-lg">
-                <div className="text-red-600 text-4xl mb-4">⚠️</div>
-                <h3 className="text-lg font-semibold text-red-800 mb-2">Error al cargar la publicación</h3>
-                <p className="text-red-600">{error}</p>
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+                <div className="bg-white rounded-lg p-8 max-w-md w-full">
+                    <div className="text-center">
+                        <div className="text-red-600 text-5xl mb-4">⚠️</div>
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">Error al cargar la publicación</h3>
+                        <p className="text-gray-600 mb-6">{error}</p>
+                        <button 
+                            onClick={() => navigate('/')}
+                            className="px-6 py-2 bg-paleta1-blue text-white rounded-lg"
+                        >
+                            Volver al Inicio
+                        </button>
+                    </div>
+                </div>
             </div>
         );
     }
 
     if (!publicacion) {
         return (
-            <div className="bg-paleta1-cream-light border border-paleta1-cream rounded-lg p-6 text-center shadow-lg">
+            <div className="bg-paleta1-cream-light border border-paleta1-cream rounded-lg p-6 text-center">
                 <div className="text-paleta1-blue text-4xl mb-4">📄</div>
                 <p className="text-paleta1-blue">Publicación no encontrada</p>
             </div>
@@ -184,32 +179,23 @@ const Publicacion = () => {
     // Vista completa de la publicación
     return (
         <div className="pt-8 bg-white min-h-screen">
-            <div className="max-w-[95vw] mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
-                {/* Contenido principal estilo tienda */}
+            <div className="max-w-[95vw] mx-auto bg-white rounded-xl overflow-hidden border border-gray-200">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-6 lg:p-12 bg-paleta1-cream-light">
-                    {/* Galería de imágenes estilo tienda - Ocupa 2 columnas */}
                     <div className="lg:col-span-2 flex gap-6">
-                        {/* Miniaturas verticales */}
                         <div className="flex flex-col gap-4 w-32">
                             {imagenes.length > 0 ? (
                                 imagenes.map((imagen, index) => (
-                                    <div key={index} className={`relative p-2 rounded-2xl border-2 transition-all duration-300 ${
+                                    <div key={index} className={`relative p-2 rounded-2xl border-2 ${
                                         index === imagenSeleccionada 
-                                            ? 'border-paleta1-blue bg-paleta1-blue-light shadow-lg' 
-                                            : 'border-gray-200 bg-white hover:border-paleta1-blue-light hover:shadow-md'
+                                            ? 'border-paleta1-blue bg-paleta1-blue-light' 
+                                            : 'border-gray-200 bg-white'
                                     }`}>
                                         <img 
                                             src={imagen} 
                                             alt={`${publicacion.titulo} ${index + 1}`}
-                                            className="w-28 h-28 object-contain bg-gray-50 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105"
+                                            className="w-28 h-28 object-contain bg-gray-50 rounded-xl cursor-pointer"
                                             onClick={() => setImagenSeleccionada(index)}
                                         />
-                                        {/* Indicador de imagen activa */}
-                                        {index === imagenSeleccionada && (
-                                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-paleta1-blue rounded-full border-2 border-white flex items-center justify-center">
-                                                <div className="w-2 h-2 bg-white rounded-full"></div>
-                                            </div>
-                                        )}
                                     </div>
                                 ))
                             ) : (
@@ -222,12 +208,11 @@ const Publicacion = () => {
                         {/* Imagen principal grande */}
                         <div className="flex-1">
                             {imagenes.length > 0 ? (
-                                <div className="bg-white p-6 rounded-3xl shadow-2xl border-2 border-gray-200">
+                                <div className="bg-white p-6 rounded-3xl border-2 border-gray-200">
                                     <img 
                                         src={imagenes[imagenSeleccionada]} 
                                         alt={publicacion.titulo}
-                                        className="w-full h-[450px] lg:h-[550px] object-contain bg-gray-50 rounded-2xl cursor-zoom-in transition-all duration-300 hover:scale-[1.01] shadow-lg"
-                                        onClick={() => setMostrarModal(true)}
+                                        className="w-full h-[450px] lg:h-[550px] object-contain bg-gray-50 rounded-2xl"
                                     />
                                 </div>
                             ) : (
@@ -243,7 +228,7 @@ const Publicacion = () => {
                         </div>
                     </div>
 
-                    {/* Panel de información estilo tienda - Ocupa 1 columna */}
+                    {/* informacion */}
                     <div className="space-y-6">
                         {/* Título y precio destacados */}
                         <div>
@@ -263,8 +248,8 @@ const Publicacion = () => {
                             </div>
                         </div>
 
-                        {/* Especificaciones básicas */}
-                        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        {/* Especificaciones */}
+                        <div className="bg-white border border-gray-200 rounded-xl p-4">
                             <h3 className="text-md font-semibold text-paleta1-blue mb-3 border-b border-gray-200 pb-2">Información Básica</h3>
                             <div className="space-y-3">
                                 <div className="flex flex-col">
@@ -294,17 +279,35 @@ const Publicacion = () => {
 
                         {/* Descripción */}
                         {publicacion.descripcion && (
-                            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                            <div className="bg-white border border-gray-200 rounded-xl p-4">
                                 <h3 className="text-md font-semibold text-paleta1-blue mb-3 border-b border-gray-200 pb-2">Descripción</h3>
-                                <p className="text-gray-700 leading-relaxed text-sm">
+                                <p className="text-gray-700 leading-relaxed text-sm break-words overflow-wrap-anywhere">
                                     {publicacion.descripcion}
                                 </p>
                             </div>
                         )}
 
-                        {/* Botones de acción */}
+                        {/* Información del Propietario */}
+                        {publicacion.nombreUsuario && (
+                            <div className="bg-white border border-gray-200 rounded-xl p-4">
+                                <h3 className="text-md font-semibold text-paleta1-blue mb-3 border-b border-gray-200 pb-2 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                    </svg>
+                                    Propietario
+                                </h3>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-gray-500 w-20">Nombre:</span>
+                                        <span className="font-medium text-gray-800 text-sm">{publicacion.nombreUsuario}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* componentes en publicacion */}
                         <div className="space-y-3">
-                            {/* Mostrar estado VENDIDO si la publicación está vendida */}
+                            {/* Mostrar estado de publicacion, segun color */}
                             {publicacion.estado === 'V' ? (
                                 <div className="w-full bg-red-100 border-2 border-red-500 text-red-700 font-bold py-3 px-4 rounded-xl text-center text-sm">
                                     <div className="flex items-center justify-center gap-2">
@@ -322,8 +325,8 @@ const Publicacion = () => {
                                         className={`w-full ${
                                             isInCart
                                                 ? 'bg-paleta1-cream text-paleta1-blue border-2 border-paleta1-blue cursor-not-allowed'
-                                                : 'bg-paleta1-cream hover:bg-paleta1-cream-light text-paleta1-blue border-2 border-paleta1-blue hover:border-paleta1-blue-light cursor-pointer'
-                                        } font-bold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-xl transform hover:scale-105 text-sm`}
+                                                : 'bg-paleta1-cream text-paleta1-blue border-2 border-paleta1-blue cursor-pointer'
+                                        } font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm`}
                                         disabled={isInCart}
                                         title={isInCart ? 'Ya está en el carrito' : 'Agregar al carrito'}
                                     >
@@ -344,15 +347,48 @@ const Publicacion = () => {
                                                 alert("Tu cuenta está inactiva. Contacta al administrador para activarla.");
                                                 return;
                                             }
-                                            navigate(`/comprar/${idPublicacion}`);
+                                            
+                                            // Crear carrito de publicacion
+                                            carritoService.clearCart();
+                                            carritoService.addToCart({
+                                                idPublicacion: publicacion.idPublicacion,
+                                                titulo: publicacion.titulo,
+                                                precio: publicacion.precio,
+                                                marcaAuto: publicacion.marcaAuto,
+                                                modeloAuto: publicacion.modeloAuto,
+                                                ubicacion: publicacion.ubicacion,
+                                                imagen: imagenes[0]?.img,
+                                                estado: publicacion.estado
+                                            });
+                                            
+                                            navigate('/comprar-carrito');
                                         }}
-                                        className="w-full bg-paleta1-blue hover:bg-paleta1-blue-light text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer text-sm"
+                                        className="w-full bg-paleta1-blue text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer text-sm"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                                         </svg>
                                         Comprar Ahora
                                     </button>
+
+                                    {/* Botón para editar la publicacion */}
+                                    { editarVisible &&
+                                        <button 
+                                            onClick={() => {
+                                                if (!isAuthenticated) {
+                                                    alert("Debes iniciar sesión para editar");
+                                                    return;
+                                                }
+                                                navigate(`/editar-publicacion/${idPublicacion}`);
+                                            }}
+                                            className="w-full bg-gray-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer text-sm"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 18.07a4.5 4.5 0 0 1-1.897 1.13L6 20.5l1.09-3.413a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14.25H6a2.25 2.25 0 0 0-2.25 2.25v2.25a2.25 2.25 0 0 0 2.25 2.25h12a2.25 2.25 0 0 0 2.25-2.25v-2.25a2.25 2.25 0 0 0-2.25-2.25Z" />
+                                            </svg>
+                                            Editar Publicación
+                                        </button>
+                                     }
                                 </>
                             )}
                         </div>
@@ -360,15 +396,15 @@ const Publicacion = () => {
                 </div>
             </div>
 
-            {/* Sección de Especificaciones Técnicas Detalladas */}
+            {/* Especificaciones mas a detalle */}
             <div className="max-w-[95vw] mx-auto mt-12 px-6 lg:px-12">
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+                <div className="bg-white rounded-xl border border-gray-200 p-8">
                     <h3 className="text-2xl font-bold text-paleta1-blue mb-8 border-b border-paleta1-cream pb-4 text-left">
                         Especificaciones Técnicas Completas
                     </h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {/* Información General del Vehículo */}
+                        {/* columna de Información General del Vehículo */}
                         <div className="space-y-4">
                             <h4 className="text-lg font-semibold text-paleta1-blue border-b border-paleta1-blue-light pb-2">
                                 Información del Vehículo
@@ -401,7 +437,7 @@ const Publicacion = () => {
                             </div>
                         </div>
 
-                        {/* Motor y Combustible */}
+                        {/* columna info de Motor y Combustible */}
                         <div className="space-y-4">
                             <h4 className="text-lg font-semibold text-paleta1-blue border-b border-paleta1-blue-light pb-2">
                                 Motor y Combustible
@@ -434,7 +470,7 @@ const Publicacion = () => {
                             </div>
                         </div>
 
-                        {/* Información de Venta y Categoría */}
+                        {/* columna de Información de Venta y Categoría */}
                         <div className="space-y-4">
                             <h4 className="text-lg font-semibold text-paleta1-blue border-b border-paleta1-blue-light pb-2">
                                 Información de Venta
@@ -469,123 +505,24 @@ const Publicacion = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Sección de campos faltantes (solo mostrar si hay campos faltantes) */}
-                    {(!publicacion.anio || !publicacion.kilometraje || !publicacion.combustible || !publicacion.motor || !publicacion.tipoCaja || !publicacion.capacidadTanque || !publicacion.tipoCategoria) && (
-                        <div className="mt-8 pt-6 border-t border-gray-200">
-                            <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                                <h5 className="font-medium text-yellow-800 mb-2">⚠️ Información Adicional Disponible</h5>
-                                <p className="text-sm text-yellow-700">
-                                    Algunos campos técnicos pueden no estar completos en la base de datos. 
-                                    Los campos mostrados arriba contienen toda la información disponible para este vehículo.
-                                </p>
-                                {(!publicacion.anio || !publicacion.kilometraje || !publicacion.combustible) && (
-                                    <div className="mt-2 text-xs text-yellow-600">
-                                        <p>Campos que podrían estar disponibles: año, kilometraje, combustible, motor, tipo de caja, capacidad del tanque, categoría.</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
 
-            {/* Sección de Comentarios */}
+            {/* Seccion Comentarios */}
             <div className="max-w-[95vw] mx-auto mt-12 px-6 lg:px-12">
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
                     <h3 className="text-2xl font-bold text-gray-900 mb-6 border-b border-gray-200 pb-4 text-left">
-                        Comentarios y Reseñas
+                        Comentarios
                     </h3>
                     <div className="text-left">
                         <ComentarioList 
                             idPublicacion={idPublicacion}
-                            tipoObjeto="publicacion"
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Modal de imagen ampliada */}
-            {mostrarModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" onClick={() => setMostrarModal(false)}>
-                    <div className="relative w-full h-full flex flex-col">
-                        {/* Header del modal */}
-                        <div className="flex justify-between items-center p-4 text-white">
-                            <h3 className="text-xl font-semibold">{publicacion.titulo} - Imagen {imagenSeleccionada + 1} de {imagenes.length}</h3>
-                            <button 
-                                onClick={() => setMostrarModal(false)}
-                                className="bg-white bg-opacity-20 text-white rounded-full p-2 hover:bg-opacity-30 transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
 
-                        {/* Imagen principal */}
-                        <div className="flex-1 flex items-center justify-center relative">
-                            <img 
-                                src={imagenes[imagenSeleccionada]} 
-                                alt={`${publicacion.titulo} - ${imagenSeleccionada + 1}`}
-                                className="max-w-full max-h-full object-contain"
-                                onClick={(e) => e.stopPropagation()}
-                            />
-                            
-                            {/* Botones de navegación */}
-                            {imagenes.length > 1 && (
-                                <>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setImagenSeleccionada(imagenSeleccionada > 0 ? imagenSeleccionada - 1 : imagenes.length - 1);
-                                        }}
-                                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 text-white rounded-full p-3 hover:bg-opacity-30 transition-colors"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                        </svg>
-                                    </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setImagenSeleccionada(imagenSeleccionada < imagenes.length - 1 ? imagenSeleccionada + 1 : 0);
-                                        }}
-                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 text-white rounded-full p-3 hover:bg-opacity-30 transition-colors"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </button>
-                                </>
-                            )}
-                        </div>
-
-                        {/* Galería de miniaturas en la parte inferior */}
-                        {imagenes.length > 1 && (
-                            <div className="p-4">
-                                <div className="flex justify-center gap-3 overflow-x-auto max-w-full">
-                                    {imagenes.map((imagen, index) => (
-                                        <img
-                                            key={index}
-                                            src={imagen}
-                                            alt={`${publicacion.titulo} miniatura ${index + 1}`}
-                                            className={`w-20 h-20 object-cover rounded-lg cursor-pointer transition-all duration-300 flex-shrink-0 ${
-                                                index === imagenSeleccionada 
-                                                    ? 'border-3 border-white shadow-lg opacity-100' 
-                                                    : 'border border-white border-opacity-30 opacity-70 hover:opacity-100'
-                                            }`}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setImagenSeleccionada(index);
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

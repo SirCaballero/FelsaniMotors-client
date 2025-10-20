@@ -44,14 +44,14 @@ const CambioContrasena = () => {
         alert("Contraseña actualizada correctamente");
         navigate('/perfil');
       })
-      .catch((error) => console.error("Error: ", error));
+      .catch(() => {});
   };
 
   return (
-    <div className="bg-[#f5efe6] min-h-screen flex justify-center items-start py-10">
+    <div className="bg-white min-h-screen flex justify-center items-start py-10">
       <form
         onSubmit={handleCambio}
-        className="bg-white border border-[#cbdceb] shadow-md rounded-2xl p-6 w-full max-w-md"
+        className="bg-white border border-[#cbdceb] rounded-2xl p-6 w-full max-w-md"
       >
         <h3 className="text-2xl font-semibold text-gray-800 mb-6">
           Cambiar Contraseña
@@ -65,7 +65,7 @@ const CambioContrasena = () => {
             <input
               name="contrasenaActual"
               type="password"
-              placeholder="..."
+              placeholder="Contraseña"
               value={contrasenaUpdate.contrasenaActual}
               onChange={handleChange}
               className="w-full border border-[#cbdceb] rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#cbdceb]"
@@ -79,7 +79,7 @@ const CambioContrasena = () => {
             <input
               name="nuevaContrasena"
               type="password"
-              placeholder="..."
+              placeholder="Nueva contraseña"
               value={contrasenaUpdate.nuevaContrasena}
               onChange={handleChange}
               className="w-full border border-[#cbdceb] rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#cbdceb]"
